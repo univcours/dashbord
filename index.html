@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Tableau de Bord Académique | Économie & Finances</title>
+    <!-- Font Awesome 6 (gratuit, icônes modernes) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts pour une typographie propre -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f4f7fc 0%, #eef2f5 100%);
+            font-family: 'Inter', sans-serif;
+            padding: 2rem 1.5rem;
+            color: #1a2c3e;
+        }
+
+        /* Conteneur principal */
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* En-tête */
+        .header {
+            margin-bottom: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 1rem;
+        }
+
+        .title-section h1 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1e4668, #0f2c44);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .title-section h1 i {
+            background: none;
+            -webkit-background-clip: unset;
+            background-clip: unset;
+            color: #1e6f5c;
+            font-size: 2rem;
+        }
+
+        .title-section p {
+            color: #4b6a85;
+            font-weight: 500;
+            margin-top: 8px;
+            font-size: 0.95rem;
+        }
+
+        .stats-badge {
+            background: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 60px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #1e4668;
+            border: 1px solid #cbdde9;
+        }
+
+        .stats-badge i {
+            margin-right: 8px;
+            color: #2c9e7c;
+        }
+
+        /* formulaire d'ajout (moderne, discret) */
+        .add-link-card {
+            background: white;
+            border-radius: 28px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 2.2rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.02), 0 2px 4px rgba(0, 0, 0, 0.02);
+            border: 1px solid #e2edf2;
+            transition: all 0.2s;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        .input-group {
+            flex: 2;
+            min-width: 200px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #5b7e9c;
+            margin-bottom: 5px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border-radius: 18px;
+            border: 1.5px solid #dce5ec;
+            font-family: 'Inter', monospace;
+            font-size: 0.9rem;
+            background: #fefefe;
+            transition: 0.2s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #2c9e7c;
+            box-shadow: 0 0 0 3px rgba(44,158,124,0.1);
+        }
+
+        .btn-add {
+            background: #1e6f5c;
+            border: none;
+            padding: 0.8rem 1.8rem;
+            border-radius: 40px;
+            font-weight: 600;
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .btn-add:hover {
+            background: #0f5a4a;
+            transform: translateY(-2px);
+        }
+
+        /* grille des cartes */
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* carte individuelle */
+        .resource-card {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(0px);
+            border-radius: 28px;
+            padding: 1.2rem 1.4rem;
+            transition: all 0.25s ease;
+            border: 1px solid #e2edf2;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.02);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .resource-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 30px -12px rgba(0, 0, 0, 0.08);
+            border-color: #cde2ec;
+            background: white;
+        }
+
+        .card-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            background: #eef3fa;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #1e6f5c;
+            flex-shrink: 0;
+        }
+
+        .card-text {
+            overflow: hidden;
+        }
+
+        .card-title {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #143750;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-url {
+            font-size: 0.7rem;
+            color: #7e9ab0;
+            font-family: monospace;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 4px;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            cursor: pointer;
+            color: #92adc2;
+            transition: 0.2s;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-btn.delete-btn:hover {
+            background: #fee2e2;
+            color: #d9534f;
+        }
+
+        .action-btn.edit-btn:hover {
+            background: #e6f4ef;
+            color: #1e6f5c;
+        }
+
+        .action-btn i {
+            pointer-events: none;
+        }
+
+        /* modal pour modifier un lien */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(3px);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            max-width: 480px;
+            width: 90%;
+            border-radius: 36px;
+            padding: 1.8rem;
+            box-shadow: 0 30px 40px rgba(0,0,0,0.2);
+        }
+
+        .modal-content h3 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 24px;
+            border: 1.5px solid #dce5ec;
+            margin: 12px 0;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 1rem;
+        }
+
+        .modal-buttons button {
+            padding: 0.5rem 1.2rem;
+            border-radius: 30px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+        }
+
+        .save-modal {
+            background: #1e6f5c;
+            color: white;
+        }
+
+        .cancel-modal {
+            background: #eef2f5;
+            color: #2c3e50;
+        }
+
+        /* Message vide */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            background: white;
+            border-radius: 48px;
+            color: #8aacbf;
+            grid-column: 1 / -1;
+        }
+
+        footer {
+            margin-top: 3rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #7f9caf;
+            border-top: 1px solid #d4e2ec;
+            padding-top: 1.8rem;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 1rem;
+            }
+            .resource-card {
+                padding: 1rem;
+            }
+            .card-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+    <div class="header">
+        <div class="title-section">
+            <h1>
+                <i class="fas fa-chalkboard-user"></i> 
+                Hub Économie & Finances
+            </h1>
+            <p>Ressources, QCM, cours et examens — Accès rapide</p>
+        </div>
+        <div class="stats-badge">
+            <i class="fas fa-link"></i> <span id="linksCount">0</span> ressources disponibles
+        </div>
+    </div>
+
+    <!-- formulaire d'ajout dynamique -->
+    <div class="add-link-card">
+        <div class="form-row">
+            <div class="input-group">
+                <label><i class="fas fa-tag"></i> Nom du lien</label>
+                <input type="text" id="newLinkTitle" placeholder="ex: Économie monétaire - Révision" autocomplete="off">
+            </div>
+            <div class="input-group">
+                <label><i class="fas fa-globe"></i> URL complète</label>
+                <input type="url" id="newLinkUrl" placeholder="https://..." autocomplete="off">
+            </div>
+            <button class="btn-add" id="addLinkBtn">
+                <i class="fas fa-plus-circle"></i> Ajouter
+            </button>
+        </div>
+    </div>
+
+    <!-- Grille des liens -->
+    <div class="links-grid" id="linksGrid">
+        <!-- Les cartes seront injectées ici via JS -->
+    </div>
+    <footer>
+        <i class="fas fa-mouse-pointer"></i> Cliquez sur une carte pour ouvrir le lien • <i class="fas fa-pen"></i> Éditez ou supprimez avec les icônes
+    </footer>
+</div>
+
+<!-- Modal d'édition -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <h3><i class="fas fa-edit"></i> Modifier le lien</h3>
+        <input type="text" id="editTitle" placeholder="Titre">
+        <input type="url" id="editUrl" placeholder="URL">
+        <div class="modal-buttons">
+            <button class="cancel-modal" id="closeModalBtn">Annuler</button>
+            <button class="save-modal" id="saveEditBtn">Enregistrer</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- LISTE DE BASE (les 20 liens fournis) ----------
+    const initialLinks = [
+        { title: "Finances Publiques - 250 QCM (effets visuels)", url: "https://eco2026.github.io/Finances-Publiques-250-QCM-Effets-visuels/" },
+        { title: "L'échantillonnage et estimations", url: "https://eco2026.github.io/L-chantillonnage-et-estimations/" },
+        { title: "Sociologie Économique", url: "https://eco2026.github.io/-Sociologie-conomique/" },
+        { title: "Économie monétaire - Préparation examen", url: "https://eco2026.github.io/-conomie-mon-taire-Pr-paration-examen/" },
+        { title: "Économie monétaire et financière", url: "https://eco2026.github.io/economiemon-taireetfinanci-re/" },
+        { title: "Réponses sociologie", url: "https://eco2026.github.io/Reponses-sociologie/" },
+        { title: "Français S4 - Résumé", url: "https://eco2026.github.io/francais-s4-resum-/" },
+        { title: "Réponses sociologie (bis)", url: "https://eco2026.github.io/reponses-soclgie/" },
+        { title: "Définition compta analytique", url: "https://eco2026.github.io/definition-compta-analytique/" },
+        { title: "Sociologie - Question de classe", url: "https://eco2026.github.io/socioquestionclasse/" },
+        { title: "Examen compta analytique", url: "https://eco2026.github.io/examencompta-analytique/" },
+        { title: "Résumé compta analytique", url: "https://eco2026.github.io/resume-compta-analytique/" },
+        { title: "Cours d'économie monétaire et financière I", url: "https://eco2026.github.io/Cours-d-conomie-mon-taire-et-financi-re-I/" },
+        { title: "ProbEcoSoc (PES)", url: "https://eco2026.github.io/ProbEcoSoc-PES/" },
+        { title: "Comptabilité Analytique - Résumé", url: "https://eco2026.github.io/-Comptabilit-Analytique-Resum-/" },
+        { title: "Quiz Finances Publiques", url: "https://eco2026.github.io/Quiz-Finances-Publiques/" },
+        { title: "Finances Publiques", url: "https://eco2026.github.io/-Finances-Publiques/" },
+        { title: "Éco monétaire v2", url: "https://eco2026.github.io/eco-mon-taire-v2/" },
+        { title: "TD PROF MAJIDI - Éco Monétaire", url: "https://eco2026.github.io/TD-PROF-MAJIDI-ECO-MONETAIRE/" },
+        { title: "L'échantillonnage et estimations (rappel)", url: "https://eco2026.github.io/L-chantillonnage-et-estimations/" }
+    ];
+
+    // Clé localStorage pour persistance
+    const STORAGE_KEY = "eco_dashboard_links";
+
+    // État des liens (sera chargé depuis localStorage ou initial)
+    let linksArray = [];
+
+    // Références DOM
+    const linksGrid = document.getElementById("linksGrid");
+    const linksCountSpan = document.getElementById("linksCount");
+    const addBtn = document.getElementById("addLinkBtn");
+    const newTitleInput = document.getElementById("newLinkTitle");
+    const newUrlInput = document.getElementById("newLinkUrl");
+
+    // Modal édition
+    const editModal = document.getElementById("editModal");
+    const editTitleInput = document.getElementById("editTitle");
+    const editUrlInput = document.getElementById("editUrl");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+    const saveEditBtn = document.getElementById("saveEditBtn");
+
+    // Variable pour stocker l'index du lien en cours d'édition
+    let currentEditIndex = null;
+
+    // ---- Utilitaires ----
+    function saveToLocalStorage() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(linksArray));
+    }
+
+    function loadFromLocalStorage() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            try {
+                const parsed = JSON.parse(stored);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    linksArray = parsed;
+                    return;
+                }
+            } catch(e) {}
+        }
+        // Si aucun stockage valide ou vide, on prend les liens initiaux (éviter doublon via l'url)
+        // mais on s'assure de ne pas avoir de doublon identique (par précaution)
+        linksArray = [...initialLinks];
+        // déduplication optionnelle basée sur l'url (au cas où deux liens strictement identiques)
+        const uniqueMap = new Map();
+        for (const link of linksArray) {
+            if (!uniqueMap.has(link.url)) {
+                uniqueMap.set(link.url, link);
+            }
+        }
+        linksArray = Array.from(uniqueMap.values());
+        saveToLocalStorage();
+    }
+
+    // Rafraîchir l'affichage de la grille
+    function renderDashboard() {
+        if (!linksGrid) return;
+        linksGrid.innerHTML = "";
+        const count = linksArray.length;
+        linksCountSpan.innerText = count;
+
+        if (count === 0) {
+            const emptyDiv = document.createElement("div");
+            emptyDiv.className = "empty-state";
+            emptyDiv.innerHTML = `<i class="fas fa-folder-open" style="font-size: 3rem; opacity: 0.5;"></i><p style="margin-top: 1rem;">Aucun lien pour le moment. Ajoutez-en via le formulaire ci-dessus.</p>`;
+            linksGrid.appendChild(emptyDiv);
+            return;
+        }
+
+        linksArray.forEach((link, idx) => {
+            const card = document.createElement("div");
+            card.className = "resource-card";
+            // Ouvrir le lien au clic sur la carte (sauf si on clique sur les boutons)
+            card.addEventListener("click", (e) => {
+                // éviter ouverture si l'élément cliqué fait partie des boutons d'action
+                const target = e.target;
+                if (target.closest('.card-actions') || target.closest('.action-btn')) return;
+                if (link.url && link.url.trim() !== "") {
+                    window.open(link.url, "_blank", "noopener noreferrer");
+                } else {
+                    alert("URL invalide");
+                }
+            });
+
+            // structure interne
+            const infoDiv = document.createElement("div");
+            infoDiv.className = "card-info";
+            // icône dynamique basée sur le contenu (sympa)
+            const iconSpan = document.createElement("div");
+            iconSpan.className = "card-icon";
+            let iconClass = "fa-book-open";
+            const titleLower = link.title.toLowerCase();
+            if (titleLower.includes("qcm") || titleLower.includes("quiz")) iconClass = "fa-question-circle";
+            else if (titleLower.includes("compta") || titleLower.includes("analytique")) iconClass = "fa-calculator";
+            else if (titleLower.includes("finance") || titleLower.includes("publique")) iconClass = "fa-landmark";
+            else if (titleLower.includes("monétaire") || titleLower.includes("monetaire")) iconClass = "fa-coins";
+            else if (titleLower.includes("sociologie")) iconClass = "fa-users";
+            else if (titleLower.includes("échantillonnage")) iconClass = "fa-chart-line";
+            else iconClass = "fa-graduation-cap";
+            iconSpan.innerHTML = `<i class="fas ${iconClass}"></i>`;
+            
+            const textDiv = document.createElement("div");
+            textDiv.className = "card-text";
+            const titleSpan = document.createElement("div");
+            titleSpan.className = "card-title";
+            titleSpan.innerText = link.title;
+            const urlSpan = document.createElement("div");
+            urlSpan.className = "card-url";
+            // Tronquer l'affichage de l'url pour lisibilité
+            let displayUrl = link.url.length > 55 ? link.url.substring(0, 52) + "..." : link.url;
+            urlSpan.innerText = displayUrl;
+            textDiv.appendChild(titleSpan);
+            textDiv.appendChild(urlSpan);
+            infoDiv.appendChild(iconSpan);
+            infoDiv.appendChild(textDiv);
+
+            const actionsDiv = document.createElement("div");
+            actionsDiv.className = "card-actions";
+            // Bouton modifier
+            const editBtn = document.createElement("button");
+            editBtn.className = "action-btn edit-btn";
+            editBtn.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+            editBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                openEditModal(idx);
+            });
+            // Bouton supprimer
+            const deleteBtn = document.createElement("button");
+            deleteBtn.className = "action-btn delete-btn";
+            deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+            deleteBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                if (confirm(`Supprimer définitivement "${link.title}" ?`)) {
+                    linksArray.splice(idx, 1);
+                    saveToLocalStorage();
+                    renderDashboard();
+                }
+            });
+            actionsDiv.appendChild(editBtn);
+            actionsDiv.appendChild(deleteBtn);
+            card.appendChild(infoDiv);
+            card.appendChild(actionsDiv);
+            linksGrid.appendChild(card);
+        });
+    }
+
+    // Ajouter un nouveau lien (avec validation)
+    function addNewLink() {
+        let title = newTitleInput.value.trim();
+        let url = newUrlInput.value.trim();
+
+        if (!title) {
+            alert("Veuillez saisir un titre pour le lien.");
+            return;
+        }
+        if (!url) {
+            alert("Veuillez saisir une URL valide.");
+            return;
+        }
+        // validation simple de l'url (commence par http:// ou https://)
+        if (!url.startsWith("http://") && !url.startsWith("https://")) {
+            // tolérance: on peut ajouter https:// par défaut
+            url = "https://" + url;
+        }
+        // vérifier si l'url existe déjà (optionnel, mais évite confusion)
+        const alreadyExists = linksArray.some(link => link.url === url);
+        if (alreadyExists) {
+            alert("Cette URL existe déjà dans votre tableau de bord.");
+            return;
+        }
+        linksArray.push({ title: title, url: url });
+        saveToLocalStorage();
+        renderDashboard();
+        // reset formulaire
+        newTitleInput.value = "";
+        newUrlInput.value = "";
+        // petit feedback
+        newTitleInput.focus();
+    }
+
+    // Ouvrir modal pour modifier un lien
+    function openEditModal(index) {
+        if (index === undefined || index < 0 || index >= linksArray.length) return;
+        currentEditIndex = index;
+        const link = linksArray[index];
+        editTitleInput.value = link.title;
+        editUrlInput.value = link.url;
+        editModal.style.display = "flex";
+    }
+
+    function closeEditModal() {
+        editModal.style.display = "none";
+        currentEditIndex = null;
+        editTitleInput.value = "";
+        editUrlInput.value = "";
+    }
+
+    function saveEdit() {
+        if (currentEditIndex === null) return;
+        const newTitle = editTitleInput.value.trim();
+        let newUrl = editUrlInput.value.trim();
+        if (!newTitle) {
+            alert("Le titre ne peut pas être vide.");
+            return;
+        }
+        if (!newUrl) {
+            alert("L'URL ne peut pas être vide.");
+            return;
+        }
+        if (!newUrl.startsWith("http://") && !newUrl.startsWith("https://")) {
+            newUrl = "https://" + newUrl;
+        }
+        // Eviter de créer un doublon avec une autre entrée (sauf si même index)
+        const duplicateIndex = linksArray.findIndex((link, idx) => idx !== currentEditIndex && link.url === newUrl);
+        if (duplicateIndex !== -1) {
+            alert("Un autre lien utilise déjà cette URL. Veuillez choisir une URL différente.");
+            return;
+        }
+        linksArray[currentEditIndex] = { title: newTitle, url: newUrl };
+        saveToLocalStorage();
+        renderDashboard();
+        closeEditModal();
+    }
+
+    // Gestion événements modale + clic externe
+    function modalOutsideClick(e) {
+        if (e.target === editModal) {
+            closeEditModal();
+        }
+    }
+
+    // Initialisation complète et chargement des données
+    function init() {
+        loadFromLocalStorage();   // initialise linksArray
+        renderDashboard();
+
+        // Ajout via bouton
+        addBtn.addEventListener("click", addNewLink);
+        // Ajout avec la touche "Entrée" dans les champs
+        const inputs = [newTitleInput, newUrlInput];
+        inputs.forEach(inp => {
+            inp.addEventListener("keypress", (e) => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    addNewLink();
+                }
+            });
+        });
+
+        // Modal events
+        closeModalBtn.addEventListener("click", closeEditModal);
+        saveEditBtn.addEventListener("click", saveEdit);
+        window.addEventListener("click", modalOutsideClick);
+        // Option pour fermer avec echap
+        window.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" && editModal.style.display === "flex") {
+                closeEditModal();
+            }
+        });
+    }
+
+    // Lancer l'application
+    init();
+</script>
+</body>
+</html>
