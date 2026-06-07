@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Tableau de Bord | Économie & Finances - Problèmes économiques et sociaux</title>
+    <title>Tableau de Bord | Économie & Finances - Sociologie & Problèmes sociaux</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -172,8 +172,8 @@
 <div class="dashboard-container">
     <div class="header">
         <div class="title-section">
-            <h1><i class="fas fa-chart-line"></i> Hub Économie & Finances</h1>
-            <p>Problèmes économiques et sociaux • Croissance • Chômage • Pauvreté • Capitalisme</p>
+            <h1><i class="fas fa-university"></i> Hub Économie & Finances</h1>
+            <p>Sociologie • Problèmes économiques et sociaux • Cours complets</p>
         </div>
         <div class="stats-badge">
             <span><i class="fas fa-link"></i> <span id="totalResourcesCount">0</span> total</span>
@@ -192,25 +192,25 @@
     </div>
     <div class="add-link-card">
         <div class="form-row">
-            <div class="input-group"><label>Titre</label><input type="text" id="newLinkTitle" placeholder="ex: Cours économie sociale"></div>
+            <div class="input-group"><label>Titre</label><input type="text" id="newLinkTitle" placeholder="ex: Cours sociologie"></div>
             <div class="input-group"><label>URL</label><input type="url" id="newLinkUrl" placeholder="https://..."></div>
             <div class="input-group"><label>Matière</label>
                 <select id="newLinkSubject">
+                    <option value="Sociologie Économique">👥 Sociologie Économique</option>
+                    <option value="Problèmes économiques et sociaux">📉 Problèmes économiques et sociaux</option>
                     <option value="Finances Publiques">💰 Finances Publiques</option>
                     <option value="Économie Monétaire">🏦 Économie Monétaire</option>
                     <option value="Comptabilité Analytique">📊 Comptabilité Analytique</option>
-                    <option value="Sociologie Économique">👥 Sociologie Économique</option>
                     <option value="Statistiques & Échantillonnage">📈 Statistiques & Échantillonnage</option>
                     <option value="Français / Méthodologie">📖 Français / Méthodologie</option>
-                    <option value="Problèmes économiques et sociaux">📉 Problèmes économiques et sociaux</option>
                     <option value="Autre">📁 Autre</option>
                 </select>
             </div>
-            <button class="btn-add" id="addLinkBtn"><i class="fas fa-plus-circle"></i> Ajouter (sauvegardé)</button>
+            <button class="btn-add" id="addLinkBtn"><i class="fas fa-plus-circle"></i> Ajouter</button>
         </div>
     </div>
     <div id="subjectsContainer"></div>
-    <footer><i class="fas fa-database"></i> Les liens "Problèmes économiques et sociaux" et "PES" sont rangés dans leur matière dédiée.</footer>
+    <footer><i class="fas fa-database"></i> Tous vos liens, notes, favoris et masquages sont sauvegardés automatiquement.</footer>
 </div>
 <div id="editModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); backdrop-filter:blur(3px); align-items:center; justify-content:center; z-index:1000;">
     <div style="background:white; max-width:500px; width:90%; border-radius:36px; padding:1.8rem;">
@@ -218,13 +218,13 @@
         <input type="text" id="editTitle" placeholder="Titre" style="width:100%; padding:0.8rem; border-radius:24px; border:1.5px solid #dce5ec; margin:10px 0;">
         <input type="url" id="editUrl" placeholder="URL" style="width:100%; padding:0.8rem; border-radius:24px; border:1.5px solid #dce5ec; margin:10px 0;">
         <select id="editSubject" style="width:100%; padding:0.8rem; border-radius:24px; border:1.5px solid #dce5ec; margin:10px 0;">
+            <option value="Sociologie Économique">👥 Sociologie Économique</option>
+            <option value="Problèmes économiques et sociaux">📉 Problèmes économiques et sociaux</option>
             <option value="Finances Publiques">💰 Finances Publiques</option>
             <option value="Économie Monétaire">🏦 Économie Monétaire</option>
             <option value="Comptabilité Analytique">📊 Comptabilité Analytique</option>
-            <option value="Sociologie Économique">👥 Sociologie Économique</option>
             <option value="Statistiques & Échantillonnage">📈 Statistiques & Échantillonnage</option>
             <option value="Français / Méthodologie">📖 Français / Méthodologie</option>
-            <option value="Problèmes économiques et sociaux">📉 Problèmes économiques et sociaux</option>
             <option value="Autre">📁 Autre</option>
         </select>
         <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:1rem;">
@@ -234,37 +234,29 @@
     </div>
 </div>
 <script>
-    // === PERSISTANCE TOTALE ===
     let linksArray = [];
     let currentFilter = "all";
-    const STORAGE_KEY = "eco_dashboard_persistent_v7";
+    const STORAGE_KEY = "eco_dashboard_final_v8";
 
     function generateId() { return Date.now() + "-" + Math.random().toString(36).substr(2, 10); }
     function getToday() { return new Date().toISOString().split('T')[0]; }
 
-    // Détection automatique de la matière avec priorité pour "Problèmes économiques et sociaux"
     function detectSubject(title, url) {
         const t = title.toLowerCase();
         const u = url.toLowerCase();
-        // Détection spécifique pour les nouveaux liens
-        if (u.includes("probleme-eco-et-sociaux") || u.includes("probleme-eco-et-sociaux-classe") || 
-            t.includes("problème économique") || t.includes("problème social") ||
-            t.includes("capitalisme") || t.includes("croissance") || t.includes("pauvreté") || t.includes("chômage")) {
+        if (u.includes("sociologie-classe") || t.includes("sociologie · cours complet") || (t.includes("sociologie") && t.includes("classe"))) 
+            return "Sociologie Économique";
+        if (u.includes("probleme-eco-et-sociaux") || u.includes("probecosoc") || t.includes("problème économique") || t.includes("capitalisme") || t.includes("croissance"))
             return "Problèmes économiques et sociaux";
-        }
-        if (u.includes("probecosoc") || t.includes("pes") || (t.includes("économie") && t.includes("social"))) {
-            return "Problèmes économiques et sociaux";
-        }
         if (t.includes("finance") || t.includes("publique")) return "Finances Publiques";
         if (t.includes("monétaire") || t.includes("monetaire")) return "Économie Monétaire";
         if (t.includes("compta") || t.includes("analytique")) return "Comptabilité Analytique";
         if (t.includes("sociologie") || t.includes("socio")) return "Sociologie Économique";
-        if (t.includes("échantillonnage") || t.includes("estimations") || t.includes("corrige")) return "Statistiques & Échantillonnage";
+        if (t.includes("échantillonnage") || t.includes("estimations")) return "Statistiques & Échantillonnage";
         if (t.includes("français") || t.includes("francais")) return "Français / Méthodologie";
         return "Autre";
     }
 
-    // Liste initiale complète (24 liens avec les deux nouveaux bien catégorisés)
     const initialRaw = [
         { title: "Finances Publiques - 250 QCM (effets visuels)", url: "https://eco2026.github.io/Finances-Publiques-250-QCM-Effets-visuels/" },
         { title: "L'échantillonnage et estimations", url: "https://eco2026.github.io/L-chantillonnage-et-estimations/" },
@@ -286,9 +278,8 @@
         { title: "Économie monétaire v2", url: "https://eco2026.github.io/eco-mon-taire-v2/" },
         { title: "TD PROF MAJIDI - Économie Monétaire", url: "https://eco2026.github.io/TD-PROF-MAJIDI-ECO-MONETAIRE/" },
         { title: "L'échantillonnage et estimations (rappel)", url: "https://eco2026.github.io/L-chantillonnage-et-estimations/" },
-        // NOUVEAUX LIENS avec matière "Problèmes économiques et sociaux"
         { title: "Problèmes économiques et sociaux - Capitalisme, Croissance, Pauvreté, Chômage", url: "https://eco2026.github.io/probleme-eco-et-sociaux-classe/" },
-        { title: "ProbEcoSoc PES - Économie et société", url: "https://eco2026.github.io/ProbEcoSoc-PES/" }
+        { title: "Sociologie · Cours complet - Épistémologie, Marx, Weber, Durkheim, sociologie économique", url: "https://eco2026.github.io/sociologie-classe/" }
     ];
 
     function buildInitialLinks() {
@@ -317,14 +308,12 @@
                 const parsed = JSON.parse(stored);
                 if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].id) {
                     linksArray = parsed;
-                    console.log("Chargé depuis localStorage :", linksArray.length);
                     return;
                 }
             } catch(e) {}
         }
         linksArray = buildInitialLinks();
         saveToLocalStorage();
-        console.log("Initialisation avec données par défaut");
     }
 
     function saveToLocalStorage() {
@@ -473,7 +462,7 @@
             grouped.get(link.subject).push(link);
         }
         
-        const order = ["Problèmes économiques et sociaux", "Finances Publiques", "Économie Monétaire", "Comptabilité Analytique", "Sociologie Économique", "Statistiques & Échantillonnage", "Français / Méthodologie", "Autre"];
+        const order = ["Sociologie Économique", "Problèmes économiques et sociaux", "Finances Publiques", "Économie Monétaire", "Comptabilité Analytique", "Statistiques & Échantillonnage", "Français / Méthodologie", "Autre"];
         const sorted = Array.from(grouped.keys()).sort((a,b) => {
             let ia = order.indexOf(a); if(ia===-1) ia=999;
             let ib = order.indexOf(b); if(ib===-1) ib=999;
@@ -485,11 +474,11 @@
             const section = document.createElement("div");
             section.className = "subject-section";
             let borderColor = "#2c9e7c";
-            if(subject === "Problèmes économiques et sociaux") borderColor="#e67e22";
+            if(subject === "Sociologie Économique") borderColor="#c44569";
+            else if(subject === "Problèmes économiques et sociaux") borderColor="#e67e22";
             else if(subject === "Finances Publiques") borderColor="#d4af37";
             else if(subject === "Économie Monétaire") borderColor="#2c7da0";
             else if(subject === "Comptabilité Analytique") borderColor="#5e9b8c";
-            else if(subject === "Sociologie Économique") borderColor="#c44569";
             else if(subject === "Statistiques & Échantillonnage") borderColor="#3498db";
             else if(subject === "Français / Méthodologie") borderColor="#9b59b6";
             
@@ -508,11 +497,11 @@
     
     function getSubjectIcon(subject) {
         const icons = { 
+            "Sociologie Économique":"👥",
             "Problèmes économiques et sociaux":"📉",
             "Finances Publiques":"💰",
             "Économie Monétaire":"🏦",
             "Comptabilité Analytique":"📊",
-            "Sociologie Économique":"👥",
             "Statistiques & Échantillonnage":"📈",
             "Français / Méthodologie":"📖",
             "Autre":"📁" 
