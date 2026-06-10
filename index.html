@@ -75,6 +75,66 @@
         .filter-btn.active { background: #1e6f5c; color: white; }
         .filter-btn i { margin-right: 6px; }
         .fav-count-badge { background: #ffeaa7; color: #d4a017; padding: 0.3rem 0.9rem; border-radius: 30px; font-size: 0.8rem; font-weight: 600; }
+        
+        /* Zone de déverrouillage */
+        .unlock-area {
+            background: linear-gradient(135deg, #2c2c2c, #1a1a1a);
+            border-radius: 28px;
+            padding: 0.8rem 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid #444;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .unlock-status {
+            color: #ffd966;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .unlock-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .code-input {
+            background: #333;
+            border: 1px solid #ffd966;
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            color: #ffd966;
+            font-family: monospace;
+            font-weight: bold;
+            text-align: center;
+            width: 120px;
+            font-size: 1.2rem;
+        }
+        .unlock-btn {
+            background: #ffd966;
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .lock-btn {
+            background: #6c757d;
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 30px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+        }
+        .locked-overlay {
+            opacity: 0.6;
+            filter: grayscale(0.2);
+        }
+        
         .add-link-card {
             background: white;
             border-radius: 28px;
@@ -107,7 +167,12 @@
             align-items: center;
             gap: 10px;
         }
-        .btn-add:hover { background: #0f5a4a; transform: translateY(-2px); }
+        .btn-add:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+        .btn-add:hover:not(:disabled) { background: #0f5a4a; transform: translateY(-2px); }
+        
         .subject-section { margin-bottom: 2.5rem; }
         .subject-header {
             display: flex;
@@ -159,12 +224,14 @@
             background: none; border: none; font-size: 1rem; cursor: pointer; color: #92adc2;
             width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
         }
+        .action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
         .action-btn.fav-btn.active-fav { color: #f5b042; }
         .action-btn.hide-btn.active-hide { color: #7f8c8d; background: #ecf0f1; }
-        .action-btn:hover { background: #eef2f5; }
-        .action-btn.delete-btn:hover { background: #fee2e2; color: #d9534f; }
+        .action-btn:hover:not(:disabled) { background: #eef2f5; }
+        .action-btn.delete-btn:hover:not(:disabled) { background: #fee2e2; color: #d9534f; }
         .empty-state { text-align: center; padding: 2rem; background: #f9fbfd; border-radius: 32px; color: #8aacbf; grid-column: 1 / -1; }
         footer { margin-top: 3rem; text-align: center; font-size: 0.8rem; color: #7f9caf; border-top: 1px solid #d4e2ec; padding-top: 1.8rem; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
         @media (max-width: 640px) { body { padding: 1rem; } .links-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -181,6 +248,20 @@
             <span><i class="fas fa-eye-slash"></i> <span id="hiddenCount">0</span> masqués</span>
         </div>
     </div>
+
+    <!-- Zone de déverrouillage - TOUTE MODIFICATION NÉCESSITE LE CODE 1980 -->
+    <div class="unlock-area">
+        <div class="unlock-status">
+            <i class="fas" id="lockIcon"></i>
+            <span id="statusText">🔒 Mode lecture seule</span>
+        </div>
+        <div class="unlock-input-group">
+            <input type="password" id="adminCodeInput" class="code-input" placeholder="Code" maxlength="4">
+            <button id="unlockBtn" class="unlock-btn">🔓 Déverrouiller</button>
+            <button id="lockBtn" class="lock-btn" style="display:none;">🔒 Verrouiller</button>
+        </div>
+    </div>
+
     <div class="filter-bar">
         <div class="filter-buttons">
             <button class="filter-btn active" data-filter="all"><i class="fas fa-th-large"></i> Toutes</button>
@@ -190,6 +271,7 @@
         </div>
         <div class="fav-count-badge"><i class="fas fa-save"></i> Sauvegarde automatique</div>
     </div>
+
     <div class="add-link-card">
         <div class="form-row">
             <div class="input-group"><label>Titre</label><input type="text" id="newLinkTitle" placeholder="ex: Cours sociologie"></div>
@@ -209,34 +291,37 @@
             <button class="btn-add" id="addLinkBtn"><i class="fas fa-plus-circle"></i> Ajouter</button>
         </div>
     </div>
+
     <div id="subjectsContainer"></div>
     <footer><i class="fas fa-database"></i> Tous vos liens, notes, favoris et masquages sont sauvegardés automatiquement.</footer>
 </div>
+
+<!-- MODAL EDIT -->
 <div id="editModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); backdrop-filter:blur(3px); align-items:center; justify-content:center; z-index:1000;">
     <div style="background:white; max-width:500px; width:90%; border-radius:36px; padding:1.8rem;">
         <h3><i class="fas fa-edit"></i> Modifier le lien</h3>
         <input type="text" id="editTitle" placeholder="Titre" style="width:100%; padding:0.8rem; border-radius:24px; border:1.5px solid #dce5ec; margin:10px 0;">
         <input type="url" id="editUrl" placeholder="URL" style="width:100%; padding:0.8rem; border-radius:24px; border:1.5px solid #dce5ec; margin:10px 0;">
-        <select id="editSubject" style="width:100%; padding:0.8rem; border-radius:24px; border:1.5px solid #dce5ec; margin:10px 0;">
-            <option value="Sociologie Économique">👥 Sociologie Économique</option>
-            <option value="Problèmes économiques et sociaux">📉 Problèmes économiques et sociaux</option>
-            <option value="Finances Publiques">💰 Finances Publiques</option>
-            <option value="Économie Monétaire">🏦 Économie Monétaire</option>
-            <option value="Comptabilité Analytique">📊 Comptabilité Analytique</option>
-            <option value="Statistiques & Échantillonnage">📈 Statistiques & Échantillonnage</option>
-            <option value="Français / Méthodologie">📖 Français / Méthodologie</option>
-            <option value="Autre">📁 Autre</option>
-        </select>
+        <select id="editSubject" style="width:100%; padding:0.8rem; border-radius:24px; border:1.5px solid #dce5ec; margin:10px 0;"></select>
         <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:1rem;">
             <button id="closeModalBtn" style="padding:0.5rem 1.2rem; border-radius:30px; border:none; background:#eef2f5;">Annuler</button>
             <button id="saveEditBtn" style="padding:0.5rem 1.2rem; border-radius:30px; border:none; background:#1e6f5c; color:white;">Enregistrer</button>
         </div>
     </div>
 </div>
+
 <script>
     let linksArray = [];
     let currentFilter = "all";
-    const STORAGE_KEY = "eco_dashboard_final_v8";
+    let isUnlocked = false;  // les modifications nécessitent le code 1980
+    const STORAGE_KEY = "eco_dashboard_protected_v1";
+    const SECRET_CODE = "1980";
+
+    // Les deux nouveaux liens demandés
+    const extraLinksToAdd = [
+        { title: "Résumé Sociologie (dernière version)", url: "https://eco2026.github.io/resume-socio-last/", forcedSubject: "Sociologie Économique" },
+        { title: "Sociologie économique - dernière version complète", url: "https://eco2026.github.io/sociologie-eco-last-version/", forcedSubject: "Sociologie Économique" }
+    ];
 
     function generateId() { return Date.now() + "-" + Math.random().toString(36).substr(2, 10); }
     function getToday() { return new Date().toISOString().split('T')[0]; }
@@ -279,18 +364,22 @@
         { title: "TD PROF MAJIDI - Économie Monétaire", url: "https://eco2026.github.io/TD-PROF-MAJIDI-ECO-MONETAIRE/" },
         { title: "L'échantillonnage et estimations (rappel)", url: "https://eco2026.github.io/L-chantillonnage-et-estimations/" },
         { title: "Problèmes économiques et sociaux - Capitalisme, Croissance, Pauvreté, Chômage", url: "https://eco2026.github.io/probleme-eco-et-sociaux-classe/" },
-        { title: "Sociologie · Cours complet - Épistémologie, Marx, Weber, Durkheim, sociologie économique", url: "https://eco2026.github.io/sociologie-classe/" }
+        { title: "Sociologie · Cours complet - Épistémologie, Marx, Weber, Durkheim, sociologie économique", url: "https://eco2026.github.io/sociologie-classe/" },
+        { title: "Résumé Sociologie (dernière version)", url: "https://eco2026.github.io/resume-socio-last/" },
+        { title: "Sociologie économique - dernière version complète", url: "https://eco2026.github.io/sociologie-eco-last-version/" }
     ];
 
     function buildInitialLinks() {
         const map = new Map();
         for (const item of initialRaw) {
             if (!map.has(item.url)) {
+                let subject = detectSubject(item.title, item.url);
+                if (item.url.includes("resume-socio-last") || item.url.includes("sociologie-eco-last-version")) subject = "Sociologie Économique";
                 map.set(item.url, {
                     id: generateId(),
                     title: item.title,
                     url: item.url,
-                    subject: detectSubject(item.title, item.url),
+                    subject: subject,
                     createdAt: getToday(),
                     isFavorite: false,
                     isHidden: false,
@@ -308,6 +397,22 @@
                 const parsed = JSON.parse(stored);
                 if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].id) {
                     linksArray = parsed;
+                    const existingUrls = new Set(linksArray.map(l => l.url));
+                    for (const extra of extraLinksToAdd) {
+                        if (!existingUrls.has(extra.url)) {
+                            linksArray.push({
+                                id: generateId(),
+                                title: extra.title,
+                                url: extra.url,
+                                subject: extra.forcedSubject,
+                                createdAt: getToday(),
+                                isFavorite: false,
+                                isHidden: false,
+                                note: ""
+                            });
+                        }
+                    }
+                    saveToLocalStorage();
                     return;
                 }
             } catch(e) {}
@@ -327,61 +432,103 @@
         document.getElementById("hiddenCount").innerText = linksArray.filter(l => l.isHidden).length;
     }
 
-    function addNewLink() {
-        let title = document.getElementById("newLinkTitle").value.trim();
-        let url = document.getElementById("newLinkUrl").value.trim();
-        const subject = document.getElementById("newLinkSubject").value;
-        if (!title) { alert("Veuillez saisir un titre"); return; }
-        if (!url) { alert("Veuillez saisir une URL"); return; }
+    // Vérification du code avant toute modification
+    function requireUnlock(actionName, callback) {
+        if (isUnlocked) {
+            callback();
+        } else {
+            alert(`⚠️ Vous devez entrer le code ${SECRET_CODE} pour ${actionName} !\nDéverrouillez la session en haut de la page.`);
+        }
+    }
+
+    function addCustomLink(title, url, subject, isHidden = false) {
+        if (!title || !url) { alert("Titre et URL requis"); return false; }
         if (!url.startsWith("http")) url = "https://" + url;
-        if (linksArray.some(link => link.url === url)) { alert("Cette URL existe déjà"); return; }
-        
+        if (linksArray.some(link => link.url === url)) { alert("Cette URL existe déjà"); return false; }
         const newLink = {
             id: generateId(),
-            title: title,
+            title: title.trim(),
             url: url,
             subject: subject,
             createdAt: getToday(),
             isFavorite: false,
-            isHidden: false,
+            isHidden: isHidden,
             note: ""
         };
         linksArray.push(newLink);
         saveToLocalStorage();
         renderDashboard();
-        document.getElementById("newLinkTitle").value = "";
-        document.getElementById("newLinkUrl").value = "";
+        return true;
     }
 
-    function toggleFavorite(id) { toggleProp(id, "isFavorite"); }
-    function toggleHidden(id) { toggleProp(id, "isHidden"); }
-    function toggleProp(id, prop) {
-        const link = linksArray.find(l => l.id === id);
-        if (link) { link[prop] = !link[prop]; saveToLocalStorage(); renderDashboard(); }
+    function addNewLink() {
+        requireUnlock("ajouter un lien", () => {
+            let title = document.getElementById("newLinkTitle").value.trim();
+            let url = document.getElementById("newLinkUrl").value.trim();
+            const subject = document.getElementById("newLinkSubject").value;
+            if (!title) { alert("Veuillez saisir un titre"); return; }
+            if (!url) { alert("Veuillez saisir une URL"); return; }
+            addCustomLink(title, url, subject, false);
+            document.getElementById("newLinkTitle").value = "";
+            document.getElementById("newLinkUrl").value = "";
+        });
     }
+
+    function toggleFavorite(id) {
+        requireUnlock("modifier les favoris", () => {
+            const link = linksArray.find(l => l.id === id);
+            if (link) { link.isFavorite = !link.isFavorite; saveToLocalStorage(); renderDashboard(); }
+        });
+    }
+    
+    function toggleHidden(id) {
+        requireUnlock("masquer/afficher un lien", () => {
+            const link = linksArray.find(l => l.id === id);
+            if (link) { link.isHidden = !link.isHidden; saveToLocalStorage(); renderDashboard(); }
+        });
+    }
+    
     function updateNote(id, newNote) {
-        const link = linksArray.find(l => l.id === id);
-        if (link) { link.note = newNote; saveToLocalStorage(); renderDashboard(); }
+        requireUnlock("modifier une note", () => {
+            const link = linksArray.find(l => l.id === id);
+            if (link) { link.note = newNote; saveToLocalStorage(); renderDashboard(); }
+        });
     }
+    
     function deleteLink(id) {
-        if (confirm("Supprimer définitivement cette ressource ?")) {
-            linksArray = linksArray.filter(l => l.id !== id);
-            saveToLocalStorage();
-            renderDashboard();
-        }
+        requireUnlock("supprimer un lien", () => {
+            if (confirm("Supprimer définitivement cette ressource ?")) {
+                linksArray = linksArray.filter(l => l.id !== id);
+                saveToLocalStorage();
+                renderDashboard();
+            }
+        });
     }
 
     let currentEditId = null;
     function openEditModal(id) {
-        const link = linksArray.find(l => l.id === id);
-        if (!link) return;
-        currentEditId = id;
-        document.getElementById("editTitle").value = link.title;
-        document.getElementById("editUrl").value = link.url;
-        document.getElementById("editSubject").value = link.subject;
-        document.getElementById("editModal").style.display = "flex";
+        requireUnlock("modifier un lien", () => {
+            const link = linksArray.find(l => l.id === id);
+            if (!link) return;
+            currentEditId = id;
+            document.getElementById("editTitle").value = link.title;
+            document.getElementById("editUrl").value = link.url;
+            const select = document.getElementById("editSubject");
+            select.innerHTML = `<option value="Sociologie Économique">👥 Sociologie Économique</option>
+                <option value="Problèmes économiques et sociaux">📉 Problèmes économiques et sociaux</option>
+                <option value="Finances Publiques">💰 Finances Publiques</option>
+                <option value="Économie Monétaire">🏦 Économie Monétaire</option>
+                <option value="Comptabilité Analytique">📊 Comptabilité Analytique</option>
+                <option value="Statistiques & Échantillonnage">📈 Statistiques & Échantillonnage</option>
+                <option value="Français / Méthodologie">📖 Français / Méthodologie</option>
+                <option value="Autre">📁 Autre</option>`;
+            select.value = link.subject;
+            document.getElementById("editModal").style.display = "flex";
+        });
     }
+    
     function closeEditModal() { document.getElementById("editModal").style.display = "none"; currentEditId = null; }
+    
     function saveEdit() {
         if (!currentEditId) return;
         const newTitle = document.getElementById("editTitle").value.trim();
@@ -416,6 +563,10 @@
         noteDiv.addEventListener("click", (e) => {
             e.stopPropagation();
             if (editing) return;
+            if (!isUnlocked) {
+                alert(`⚠️ Vous devez entrer le code ${SECRET_CODE} pour modifier une note !`);
+                return;
+            }
             editing = true;
             const input = document.createElement("textarea");
             input.className = "note-input";
@@ -450,7 +601,6 @@
         else if (currentFilter === "hidden") filtered = filtered.filter(l => l.isHidden);
         
         updateStatsUI();
-        
         if (filtered.length === 0) {
             container.innerHTML = `<div class="empty-state"><i class="fas fa-filter"></i><p>Aucune ressource avec ce filtre.</p></div>`;
             return;
@@ -481,14 +631,7 @@
             else if(subject === "Comptabilité Analytique") borderColor="#5e9b8c";
             else if(subject === "Statistiques & Échantillonnage") borderColor="#3498db";
             else if(subject === "Français / Méthodologie") borderColor="#9b59b6";
-            
-            section.innerHTML = `
-                <div class="subject-header" style="border-left-color: ${borderColor};">
-                    <h2>${getSubjectIcon(subject)} ${subject}</h2>
-                    <span class="subject-count">${items.length} ressource${items.length>1?'s':''}</span>
-                </div>
-                <div class="links-grid" id="grid-${subject.replace(/\s/g,'')}"></div>
-            `;
+            section.innerHTML = `<div class="subject-header" style="border-left-color: ${borderColor};"><h2>${getSubjectIcon(subject)} ${subject}</h2><span class="subject-count">${items.length} ressource${items.length>1?'s':''}</span></div><div class="links-grid" id="grid-${subject.replace(/\s/g,'')}"></div>`;
             container.appendChild(section);
             const grid = section.querySelector(".links-grid");
             items.forEach(link => { grid.appendChild(createCard(link)); });
@@ -496,16 +639,7 @@
     }
     
     function getSubjectIcon(subject) {
-        const icons = { 
-            "Sociologie Économique":"👥",
-            "Problèmes économiques et sociaux":"📉",
-            "Finances Publiques":"💰",
-            "Économie Monétaire":"🏦",
-            "Comptabilité Analytique":"📊",
-            "Statistiques & Échantillonnage":"📈",
-            "Français / Méthodologie":"📖",
-            "Autre":"📁" 
-        };
+        const icons = { "Sociologie Économique":"👥","Problèmes économiques et sociaux":"📉","Finances Publiques":"💰","Économie Monétaire":"🏦","Comptabilité Analytique":"📊","Statistiques & Échantillonnage":"📈","Français / Méthodologie":"📖","Autre":"📁" };
         return icons[subject] || "📘";
     }
     
@@ -516,8 +650,6 @@
         if(t.includes("finance")) return "fa-landmark";
         if(t.includes("monétaire")) return "fa-coins";
         if(t.includes("sociologie")) return "fa-users";
-        if(t.includes("échantillonnage")) return "fa-chart-line";
-        if(t.includes("capitalisme")||t.includes("croissance")||t.includes("pauvreté")||t.includes("chômage")) return "fa-chart-line";
         return "fa-book-open";
     }
     
@@ -530,27 +662,21 @@
         const mainDiv = document.createElement("div"); mainDiv.className = "card-main";
         const infoDiv = document.createElement("div"); infoDiv.className = "card-info";
         infoDiv.addEventListener("click", () => { if(!link.isHidden) window.open(link.url, "_blank"); });
-        const iconClass = getIconClass(link.title);
-        infoDiv.innerHTML = `
-            <div class="card-icon"><i class="fas ${iconClass}"></i></div>
-            <div class="card-text">
-                <div class="card-title">${escapeHtml(link.title)}</div>
-                <div class="card-meta">
-                    <span><i class="fas fa-calendar-alt"></i> ${link.createdAt}</span>
-                    <span><i class="fas fa-folder"></i> ${link.subject}</span>
-                </div>
-                <div class="card-url" title="${escapeHtml(link.url)}">${truncateUrl(link.url)}</div>
-            </div>
-        `;
+        infoDiv.innerHTML = `<div class="card-icon"><i class="fas ${getIconClass(link.title)}"></i></div><div class="card-text"><div class="card-title">${escapeHtml(link.title)}</div><div class="card-meta"><span><i class="fas fa-calendar-alt"></i> ${link.createdAt}</span><span><i class="fas fa-folder"></i> ${link.subject}</span></div><div class="card-url" title="${escapeHtml(link.url)}">${truncateUrl(link.url)}</div></div>`;
         const actionsDiv = document.createElement("div"); actionsDiv.className = "card-actions";
+        
         const favBtn = document.createElement("button"); favBtn.className = `action-btn fav-btn ${link.isFavorite ? 'active-fav' : ''}`; favBtn.innerHTML = '<i class="fas fa-star"></i>';
         favBtn.addEventListener("click", (e) => { e.stopPropagation(); toggleFavorite(link.id); });
+        
         const hideBtn = document.createElement("button"); hideBtn.className = `action-btn hide-btn ${link.isHidden ? 'active-hide' : ''}`; hideBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';
         hideBtn.addEventListener("click", (e) => { e.stopPropagation(); toggleHidden(link.id); });
+        
         const editBtn = document.createElement("button"); editBtn.className = "action-btn edit-btn"; editBtn.innerHTML = '<i class="fas fa-pencil-alt"></i>';
         editBtn.addEventListener("click", (e) => { e.stopPropagation(); openEditModal(link.id); });
+        
         const delBtn = document.createElement("button"); delBtn.className = "action-btn delete-btn"; delBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
         delBtn.addEventListener("click", (e) => { e.stopPropagation(); deleteLink(link.id); });
+        
         actionsDiv.append(favBtn, hideBtn, editBtn, delBtn);
         mainDiv.append(infoDiv, actionsDiv);
         card.appendChild(mainDiv);
@@ -558,14 +684,44 @@
         return card;
     }
 
+    // Gestion du déverrouillage avec le code 1980
+    function unlockSession() {
+        const codeInput = document.getElementById("adminCodeInput");
+        if (codeInput.value === SECRET_CODE) {
+            isUnlocked = true;
+            document.getElementById("lockIcon").className = "fas fa-lock-open";
+            document.getElementById("statusText").innerHTML = "✅ Mode édition activé (code 1980)";
+            document.getElementById("unlockBtn").style.display = "none";
+            document.getElementById("lockBtn").style.display = "inline-block";
+            document.getElementById("addLinkBtn").disabled = false;
+            alert("✅ Code correct ! Vous pouvez maintenant ajouter, modifier, supprimer, mettre en favori, masquer et ajouter des notes.");
+        } else {
+            alert("❌ Code incorrect ! Le code est 1980");
+            codeInput.value = "";
+        }
+    }
+    
+    function lockSession() {
+        isUnlocked = false;
+        document.getElementById("lockIcon").className = "fas fa-lock";
+        document.getElementById("statusText").innerHTML = "🔒 Mode lecture seule";
+        document.getElementById("unlockBtn").style.display = "inline-block";
+        document.getElementById("lockBtn").style.display = "none";
+        document.getElementById("addLinkBtn").disabled = true;
+        document.getElementById("adminCodeInput").value = "";
+    }
+
     function init() {
         loadFromLocalStorage();
         renderDashboard();
+        
+        // Désactiver le bouton d'ajout par défaut (lecture seule)
+        document.getElementById("addLinkBtn").disabled = true;
+        
         document.getElementById("addLinkBtn").addEventListener("click", addNewLink);
-        const titleInput = document.getElementById("newLinkTitle");
-        const urlInput = document.getElementById("newLinkUrl");
-        titleInput.addEventListener("keypress", e => { if(e.key==="Enter") addNewLink(); });
-        urlInput.addEventListener("keypress", e => { if(e.key==="Enter") addNewLink(); });
+        document.getElementById("unlockBtn").addEventListener("click", unlockSession);
+        document.getElementById("lockBtn").addEventListener("click", lockSession);
+        
         document.querySelectorAll(".filter-btn").forEach(btn => {
             btn.addEventListener("click", (e) => {
                 document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
@@ -574,11 +730,13 @@
                 renderDashboard();
             });
         });
+        
         document.getElementById("closeModalBtn").addEventListener("click", closeEditModal);
         document.getElementById("saveEditBtn").addEventListener("click", saveEdit);
         window.addEventListener("click", (e) => { if(e.target === document.getElementById("editModal")) closeEditModal(); });
         window.addEventListener("keydown", (e) => { if(e.key==="Escape" && document.getElementById("editModal").style.display==="flex") closeEditModal(); });
     }
+    
     init();
 </script>
 </body>
