@@ -1,745 +1,740 @@
-
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <meta http-equiv="refresh" content="300">
-
-    <title>Tableau de Bord | Économie & Finances - Sociologie & Problèmes sociaux</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: linear-gradient(145deg, #f4f7fc 0%, #eef2f5 100%);
-            font-family: 'Inter', sans-serif;
-            padding: 2rem 1.5rem;
-            color: #1a2c3e;
-        }
-        .dashboard-container { max-width: 1400px; margin: 0 auto; }
-        .header {
-            margin-bottom: 2rem;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: flex-end;
-            gap: 1rem;
-        }
-        .title-section h1 {
-            font-size: 1.9rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #1e4668, #0f2c44);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .title-section h1 i { background: none; color: #1e6f5c; font-size: 2rem; }
-        .title-section p { color: #4b6a85; font-weight: 500; margin-top: 8px; font-size: 0.95rem; }
-        .stats-badge {
-            background: white;
-            padding: 0.6rem 1.2rem;
-            border-radius: 60px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: #1e4668;
-            border: 1px solid #cbdde9;
-            display: flex;
-            gap: 15px;
-        }
-        .stats-badge span { display: inline-flex; align-items: center; gap: 6px; }
-        .filter-bar {
-            background: white;
-            border-radius: 28px;
-            padding: 0.5rem 1rem;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 1rem;
-            border: 1px solid #e2edf2;
-        }
-        .filter-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
-        .filter-btn {
-            background: #f0f4f8;
-            border: none;
-            padding: 0.5rem 1.2rem;
-            border-radius: 40px;
-            font-weight: 500;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: 0.2s;
-            color: #4b6a85;
-        }
-        .filter-btn.active { background: #1e6f5c; color: white; }
-        .filter-btn i { margin-right: 6px; }
-        .fav-count-badge { background: #ffeaa7; color: #d4a017; padding: 0.3rem 0.9rem; border-radius: 30px; font-size: 0.8rem; font-weight: 600; }
-        
-        /* Zone de déverrouillage */
-        .unlock-area {
-            background: linear-gradient(135deg, #2c2c2c, #1a1a1a);
-            border-radius: 28px;
-            padding: 0.8rem 1.5rem;
-            margin-bottom: 2rem;
-            border: 1px solid #444;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-        .unlock-status {
-            color: #ffd966;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .unlock-input-group {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        .code-input {
-            background: #333;
-            border: 1px solid #ffd966;
-            padding: 0.5rem 1rem;
-            border-radius: 30px;
-            color: #ffd966;
-            font-family: monospace;
-            font-weight: bold;
-            text-align: center;
-            width: 120px;
-            font-size: 1.2rem;
-        }
-        .unlock-btn {
-            background: #ffd966;
-            border: none;
-            padding: 0.5rem 1.2rem;
-            border-radius: 30px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .lock-btn {
-            background: #6c757d;
-            border: none;
-            padding: 0.5rem 1.2rem;
-            border-radius: 30px;
-            font-weight: bold;
-            color: white;
-            cursor: pointer;
-        }
-        .locked-overlay {
-            opacity: 0.6;
-            filter: grayscale(0.2);
-        }
-        
-        .add-link-card {
-            background: white;
-            border-radius: 28px;
-            padding: 1rem 1.5rem;
-            margin-bottom: 2rem;
-            border: 1px solid #e2edf2;
-        }
-        .form-row { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; }
-        .input-group { flex: 2; min-width: 160px; }
-        .input-group label { display: block; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #5b7e9c; margin-bottom: 5px; }
-        .input-group input, .input-group select {
-            width: 100%;
-            padding: 0.8rem 1rem;
-            border-radius: 18px;
-            border: 1.5px solid #dce5ec;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.9rem;
-            background: #fefefe;
-        }
-        .btn-add {
-            background: #1e6f5c;
-            border: none;
-            padding: 0.8rem 1.8rem;
-            border-radius: 40px;
-            font-weight: 600;
-            color: white;
-            cursor: pointer;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .btn-add:disabled {
-            background: #95a5a6;
-            cursor: not-allowed;
-        }
-        .btn-add:hover:not(:disabled) { background: #0f5a4a; transform: translateY(-2px); }
-        
-        .subject-section { margin-bottom: 2.5rem; }
-        .subject-header {
-            display: flex;
-            align-items: baseline;
-            gap: 15px;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-            border-left: 5px solid;
-            padding-left: 1rem;
-        }
-        .subject-header h2 { font-size: 1.5rem; font-weight: 600; color: #1e3a5f; }
-        .subject-count { background: #e2edf2; padding: 0.2rem 0.8rem; border-radius: 30px; font-size: 0.75rem; font-weight: 600; color: #2c5a7a; }
-        .links-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(440px, 1fr)); gap: 1.2rem; }
-        .resource-card {
-            background: white;
-            border-radius: 24px;
-            padding: 1rem 1.2rem;
-            transition: all 0.25s ease;
-            border: 1px solid #e2edf2;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .resource-card.favorite { border-left: 4px solid #f5b042; background: #fffef7; }
-        .resource-card.hidden { opacity: 0.5; background: #f5f7f9; filter: grayscale(0.1); }
-        .card-main { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-        .card-info { display: flex; align-items: flex-start; gap: 12px; flex: 1; cursor: pointer; }
-        .card-icon {
-            width: 44px; height: 44px; background: #eef3fa; border-radius: 20px;
-            display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: #1e6f5c; flex-shrink: 0;
-        }
-        .card-text { flex: 1; }
-        .card-title { font-weight: 700; font-size: 0.95rem; line-height: 1.35; color: #143750; word-wrap: break-word; margin-bottom: 4px; }
-        .card-meta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 6px; font-size: 0.68rem; color: #8aa9c2; }
-        .card-meta span { display: inline-flex; align-items: center; gap: 4px; }
-        .card-url { font-size: 0.65rem; color: #7e9ab0; font-family: monospace; word-break: break-all; margin-top: 4px; }
-        .note-area { margin-top: 10px; padding-top: 8px; border-top: 1px dashed #e2edf2; display: flex; align-items: flex-start; gap: 8px; }
-        .note-icon { color: #8aa9c2; font-size: 0.8rem; margin-top: 2px; }
-        .note-text {
-            flex: 1; font-size: 0.75rem; color: #5b7e9c; background: #f8fafc;
-            padding: 6px 10px; border-radius: 16px; cursor: pointer; word-break: break-word; line-height: 1.4;
-        }
-        .note-text:hover { background: #eef3fa; }
-        .note-text.empty { color: #b3c7d8; font-style: italic; }
-        .note-input { flex: 1; font-size: 0.75rem; padding: 6px 10px; border-radius: 16px; border: 1px solid #cde2ec; font-family: 'Inter', sans-serif; background: white; resize: vertical; }
-        .note-save-btn { background: #1e6f5c; border: none; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; cursor: pointer; }
-        .card-actions { display: flex; gap: 6px; flex-shrink: 0; }
-        .action-btn {
-            background: none; border: none; font-size: 1rem; cursor: pointer; color: #92adc2;
-            width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
-        }
-        .action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-        .action-btn.fav-btn.active-fav { color: #f5b042; }
-        .action-btn.hide-btn.active-hide { color: #7f8c8d; background: #ecf0f1; }
-        .action-btn:hover:not(:disabled) { background: #eef2f5; }
-        .action-btn.delete-btn:hover:not(:disabled) { background: #fee2e2; color: #d9534f; }
-        .empty-state { text-align: center; padding: 2rem; background: #f9fbfd; border-radius: 32px; color: #8aacbf; grid-column: 1 / -1; }
-        footer { margin-top: 3rem; text-align: center; font-size: 0.8rem; color: #7f9caf; border-top: 1px solid #d4e2ec; padding-top: 1.8rem; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
-        @media (max-width: 640px) { body { padding: 1rem; } .links-grid { grid-template-columns: 1fr; } }
+<head>    
+    <meta charset="UTF-8">    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">    
+    <title>Tableau de Bord | Économie & Finances - Sociologie & Problèmes sociaux</title>    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">    
+    <style>        
+        * { margin: 0; padding: 0; box-sizing: border-box; }        
+        body {            
+            background: linear-gradient(145deg, #f4f7fc 0%, #eef2f5 100%);            
+            font-family: 'Inter', sans-serif;            
+            padding: 2rem 1.5rem;            
+            color: #1a2c3e;        
+        }        
+        .dashboard-container { max-width: 1400px; margin: 0 auto; }        
+        .header {            
+            margin-bottom: 2rem;            
+            display: flex;            
+            flex-wrap: wrap;            
+            justify-content: space-between;            
+            align-items: flex-end;            
+            gap: 1rem;        
+        }        
+        .title-section h1 {            
+            font-size: 1.9rem;            
+            font-weight: 700;            
+            background: linear-gradient(135deg, #1e4668, #0f2c44);            
+            -webkit-background-clip: text;            
+            background-clip: text;            
+            color: transparent;            
+            display: inline-flex;            
+            align-items: center;            
+            gap: 12px;        
+        }        
+        .title-section h1 i { background: none; color: #1e6f5c; font-size: 2rem; }        
+        .title-section p { color: #4b6a85; font-weight: 500; margin-top: 8px; font-size: 0.95rem; }        
+        .stats-badge {            
+            background: white;            
+            padding: 0.6rem 1.2rem;            
+            border-radius: 60px;            
+            font-weight: 600;            
+            font-size: 0.9rem;            
+            color: #1e4668;            
+            border: 1px solid #cbdde9;            
+            display: flex;            
+            gap: 15px;        
+        }        
+        .stats-badge span { display: inline-flex; align-items: center; gap: 6px; }        
+        .filter-bar {            
+            background: white;            
+            border-radius: 28px;            
+            padding: 0.5rem 1rem;            
+            margin-bottom: 1.5rem;            
+            display: flex;            
+            align-items: center;            
+            justify-content: space-between;            
+            flex-wrap: wrap;            
+            gap: 1rem;            
+            border: 1px solid #e2edf2;        
+        }        
+        .filter-buttons { display: flex; gap: 12px; flex-wrap: wrap; }        
+        .filter-btn {            
+            background: #f0f4f8;            
+            border: none;            
+            padding: 0.5rem 1.2rem;            
+            border-radius: 40px;            
+            font-weight: 500;            
+            font-size: 0.85rem;            
+            cursor: pointer;            
+            transition: 0.2s;            
+            color: #4b6a85;        
+        }        
+        .filter-btn.active { background: #1e6f5c; color: white; }        
+        .filter-btn i { margin-right: 6px; }        
+        .fav-count-badge { background: #ffeaa7; color: #d4a017; padding: 0.3rem 0.9rem; border-radius: 30px; font-size: 0.8rem; font-weight: 600; }                
+        /* Zone de déverrouillage */        
+        .unlock-area {            
+            background: linear-gradient(135deg, #2c2c2c, #1a1a1a);            
+            border-radius: 28px;            
+            padding: 0.8rem 1.5rem;            
+            margin-bottom: 2rem;            
+            border: 1px solid #444;            
+            display: flex;            
+            justify-content: space-between;            
+            align-items: center;            
+            flex-wrap: wrap;            
+            gap: 1rem;        
+        }        
+        .unlock-status {            
+            color: #ffd966;            
+            font-weight: bold;            
+            display: flex;            
+            align-items: center;            
+            gap: 8px;        
+        }        
+        .unlock-input-group {            
+            display: flex;            
+            gap: 10px;            
+            align-items: center;        
+        }        
+        .code-input {            
+            background: #333;            
+            border: 1px solid #ffd966;            
+            padding: 0.5rem 1rem;            
+            border-radius: 30px;            
+            color: #ffd966;            
+            font-family: monospace;            
+            font-weight: bold;            
+            text-align: center;            
+            width: 120px;            
+            font-size: 1.2rem;        
+        }        
+        .unlock-btn {            
+            background: #ffd966;            
+            border: none;            
+            padding: 0.5rem 1.2rem;            
+            border-radius: 30px;            
+            font-weight: bold;            
+            cursor: pointer;        
+        }        
+        .lock-btn {            
+            background: #6c757d;            
+            border: none;            
+            padding: 0.5rem 1.2rem;            
+            border-radius: 30px;            
+            font-weight: bold;            
+            color: white;            
+            cursor: pointer;        
+        }        
+        .locked-overlay {            
+            opacity: 0.6;            
+            filter: grayscale(0.2);        
+        }                
+        .add-link-card {            
+            background: white;            
+            border-radius: 28px;            
+            padding: 1rem 1.5rem;            
+            margin-bottom: 2rem;            
+            border: 1px solid #e2edf2;        
+        }        
+        .form-row { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; }        
+        .input-group { flex: 2; min-width: 160px; }        
+        .input-group label { display: block; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #5b7e9c; margin-bottom: 5px; }        
+        .input-group input, .input-group select {            
+            width: 100%;            
+            padding: 0.8rem 1rem;            
+            border-radius: 18px;            
+            border: 1.5px solid #dce5ec;            
+            font-family: 'Inter', sans-serif;            
+            font-size: 0.9rem;            
+            background: #fefefe;        
+        }        
+        .btn-add {            
+            background: #1e6f5c;            
+            border: none;            
+            padding: 0.8rem 1.8rem;            
+            border-radius: 40px;            
+            font-weight: 600;            
+            color: white;            
+            cursor: pointer;            
+            transition: 0.2s;            
+            display: flex;            
+            align-items: center;            
+            gap: 10px;        
+        }        
+        .btn-add:disabled {            
+            background: #95a5a6;            
+            cursor: not-allowed;        
+        }        
+        .btn-add:hover:not(:disabled) { background: #0f5a4a; transform: translateY(-2px); }                
+        .subject-section { margin-bottom: 2.5rem; }        
+        .subject-header {            
+            display: flex;            
+            align-items: baseline;            
+            gap: 15px;            
+            margin-bottom: 1rem;            
+            flex-wrap: wrap;            
+            border-left: 5px solid;            
+            padding-left: 1rem;        
+        }        
+        .subject-header h2 { font-size: 1.5rem; font-weight: 600; color: #1e3a5f; }        
+        .subject-count { background: #e2edf2; padding: 0.2rem 0.8rem; border-radius: 30px; font-size: 0.75rem; font-weight: 600; color: #2c5a7a; }        
+        .links-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(440px, 1fr)); gap: 1.2rem; }        
+        .resource-card {            
+            background: white;            
+            border-radius: 24px;            
+            padding: 1rem 1.2rem;            
+            transition: all 0.25s ease;            
+            border: 1px solid #e2edf2;            
+            display: flex;            
+            flex-direction: column;            
+            gap: 10px;        
+        }        
+        .resource-card.favorite { border-left: 4px solid #f5b042; background: #fffef7; }        
+        .resource-card.hidden { opacity: 0.5; background: #f5f7f9; filter: grayscale(0.1); }        
+        .card-main { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }        
+        .card-info { display: flex; align-items: flex-start; gap: 12px; flex: 1; cursor: pointer; }        
+        .card-icon {            
+            width: 44px; height: 44px; background: #eef3fa; border-radius: 20px;            
+            display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: #1e6f5c; flex-shrink: 0;        
+        }        
+        .card-text { flex: 1; }        
+        .card-title { font-weight: 700; font-size: 0.95rem; line-height: 1.35; color: #143750; word-wrap: break-word; margin-bottom: 4px; }        
+        .card-meta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 6px; font-size: 0.68rem; color: #8aa9c2; }        
+        .card-meta span { display: inline-flex; align-items: center; gap: 4px; }        
+        .card-url { font-size: 0.65rem; color: #7e9ab0; font-family: monospace; word-break: break-all; margin-top: 4px; }        
+        .note-area { margin-top: 10px; padding-top: 8px; border-top: 1px dashed #e2edf2; display: flex; align-items: flex-start; gap: 8px; }        
+        .note-icon { color: #8aa9c2; font-size: 0.8rem; margin-top: 2px; }        
+        .note-text {            
+            flex: 1; font-size: 0.75rem; color: #5b7e9c; background: #f8fafc;            
+            padding: 6px 10px; border-radius: 16px; cursor: pointer; word-break: break-word; line-height: 1.4;        
+        }        
+        .note-text:hover { background: #eef3fa; }        
+        .note-text.empty { color: #b3c7d8; font-style: italic; }        
+        .note-input { flex: 1; font-size: 0.75rem; padding: 6px 10px; border-radius: 16px; border: 1px solid #cde2ec; font-family: 'Inter', sans-serif; background: white; resize: vertical; }        
+        .note-save-btn { background: #1e6f5c; border: none; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; cursor: pointer; }        
+        .card-actions { display: flex; gap: 6px; flex-shrink: 0; }        
+        .action-btn {            
+            background: none; border: none; font-size: 1rem; cursor: pointer; color: #92adc2;            
+            width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;        
+        }        
+        .action-btn:disabled { opacity: 0.4; cursor: not-allowed; }        
+        .action-btn.fav-btn.active-fav { color: #f5b042; }        
+        .action-btn.hide-btn.active-hide { color: #7f8c8d; background: #ecf0f1; }        
+        .action-btn:hover:not(:disabled) { background: #eef2f5; }        
+        .action-btn.delete-btn:hover:not(:disabled) { background: #fee2e2; color: #d9534f; }        
+        .empty-state { text-align: center; padding: 2rem; background: #f9fbfd; border-radius: 32px; color: #8aacbf; grid-column: 1 / -1; }        
+        footer { margin-top: 3rem; text-align: center; font-size: 0.8rem; color: #7f9caf; border-top: 1px solid #d4e2ec; padding-top: 1.8rem; }        
+        .sync-badge { display: inline-flex; align-items: center; gap: 6px; color: #2ecc71; font-size: 0.8rem; font-weight: 600; padding: 0.3rem 0.9rem; border-radius: 30px; background: #e8f8f5; border: 1px solid #a3e4d7; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }        
+        @media (max-width: 640px) { body { padding: 1rem; } .links-grid { grid-template-columns: 1fr; } }    
     </style>
 </head>
 <body>
-<div class="dashboard-container">
-    <div class="header">
-        <div class="title-section">
-            <h1><i class="fas fa-university"></i> Hub Économie & Finances</h1>
-            <p>Sociologie • Problèmes économiques et sociaux • Cours complets</p>
-        </div>
-        <div class="stats-badge">
-            <span><i class="fas fa-link"></i> <span id="totalResourcesCount">0</span> total</span>
-            <span><i class="fas fa-star" style="color:#f5b042;"></i> <span id="favCount">0</span> favoris</span>
-            <span><i class="fas fa-eye-slash"></i> <span id="hiddenCount">0</span> masqués</span>
+<div class="dashboard-container">    
+    <div class="header">        
+        <div class="title-section">            
+            <h1><i class="fas fa-university"></i> Hub Économie & Finances</h1>            
+            <p>Tableau de bord des modules de la session</p>        
+        </div>        
+        <div class="stats-badge">            
+            <span><i class="fas fa-link"></i> <span id="totalResourcesCount">0</span> total</span>            
+            <span><i class="fas fa-star" style="color:#f5b042;"></i> <span id="favCount">0</span> favoris</span>            
+            <span><i class="fas fa-eye-slash"></i> <span id="hiddenCount">0</span> masqués</span>        
+        </div>    
+    </div>
+
+    <div class="unlock-area">        
+        <div class="unlock-status">            
+            <i class="fas" id="lockIcon"></i>            
+            <span id="statusText">🔒 Mode lecture seule</span>        
+        </div>        
+        <div class="unlock-input-group">            
+            <input type="password" id="adminCodeInput" class="code-input" placeholder="Code" maxlength="4">            
+            <button id="unlockBtn" class="unlock-btn">🔓 Déverrouiller</button>            
+            <button id="lockBtn" class="lock-btn" style="display:none;">🔒 Verrouiller</button>        
+        </div>    
+    </div>
+
+    <div class="filter-bar">        
+        <div class="filter-buttons">            
+            <button class="filter-btn active" data-filter="all"><i class="fas fa-th-large"></i> Toutes</button>            
+            <button class="filter-btn" data-filter="favorites"><i class="fas fa-star"></i> Favoris</button>            
+            <button class="filter-btn" data-filter="visible"><i class="fas fa-eye"></i> Visibles</button>            
+            <button class="filter-btn" data-filter="hidden"><i class="fas fa-eye-slash"></i> Masquées</button>        
+        </div>        
+        <div style="display:flex; gap:10px;">
+            <div class="sync-badge" id="syncStatus"><i class="fas fa-sync fa-spin"></i> Sync GitHub...</div>
+            <div class="fav-count-badge"><i class="fas fa-save"></i> Sauvegarde automatique</div>    
         </div>
     </div>
 
-    <!-- Zone de déverrouillage - TOUTE MODIFICATION NÉCESSITE LE CODE -->
-    <div class="unlock-area">
-        <div class="unlock-status">
-            <i class="fas" id="lockIcon"></i>
-            <span id="statusText">🔒 Mode lecture seule</span>
-        </div>
-        <div class="unlock-input-group">
-            <input type="password" id="adminCodeInput" class="code-input" placeholder="Code" maxlength="4">
-            <button id="unlockBtn" class="unlock-btn">🔓 Déverrouiller</button>
-            <button id="lockBtn" class="lock-btn" style="display:none;">🔒 Verrouiller</button>
-        </div>
+    <div class="add-link-card">        
+        <div class="form-row">            
+            <div class="input-group"><label>Titre</label><input type="text" id="newLinkTitle" placeholder="ex: Cours sociologie"></div>            
+            <div class="input-group"><label>URL</label><input type="url" id="newLinkUrl" placeholder="https://..."></div>            
+            <div class="input-group"><label>Module</label>                
+                <select id="newLinkSubject">                    
+                    <option value="Echantillonnage et Estimation">📈 Echantillonnage et Estimation</option>                    
+                    <option value="Economie Monétaire et Financière">🏦 Economie Monétaire et Financière</option>                    
+                    <option value="Français">📖 Français</option>                    
+                    <option value="Problèmes Eco et Sociaux">📉 Problèmes Eco et Sociaux</option>                    
+                    <option value="Sociologie">👥 Sociologie</option>                    
+                    <option value="Comptabilité Analytique">📊 Comptabilité Analytique</option>                    
+                    <option value="Finances Publiques">💰 Finances Publiques</option>                    
+                </select>            
+            </div>            
+            <button class="btn-add" id="addLinkBtn"><i class="fas fa-plus-circle"></i> Ajouter</button>        
+        </div>    
     </div>
 
-    <div class="filter-bar">
-        <div class="filter-buttons">
-            <button class="filter-btn active" data-filter="all"><i class="fas fa-th-large"></i> Toutes</button>
-            <button class="filter-btn" data-filter="favorites"><i class="fas fa-star"></i> Favoris</button>
-            <button class="filter-btn" data-filter="visible"><i class="fas fa-eye"></i> Visibles</button>
-            <button class="filter-btn" data-filter="hidden"><i class="fas fa-eye-slash"></i> Masquées</button>
-        </div>
-        <div class="fav-count-badge"><i class="fas fa-save"></i> Sauvegarde automatique</div>
-    </div>
-
-    <div class="add-link-card">
-        <div class="form-row">
-            <div class="input-group"><label>Titre</label><input type="text" id="newLinkTitle" placeholder="ex: Cours sociologie"></div>
-            <div class="input-group"><label>URL</label><input type="url" id="newLinkUrl" placeholder="https://..."></div>
-            <div class="input-group"><label>Matière</label>
-                <select id="newLinkSubject">
-                    <option value="Sociologie Économique">👥 Sociologie Économique</option>
-                    <option value="Problèmes économiques et sociaux">📉 Problèmes économiques et sociaux</option>
-                    <option value="Finances Publiques">💰 Finances Publiques</option>
-                    <option value="Économie Monétaire">🏦 Économie Monétaire</option>
-                    <option value="Comptabilité Analytique">📊 Comptabilité Analytique</option>
-                    <option value="Statistiques & Échantillonnage">📈 Statistiques & Échantillonnage</option>
-                    <option value="Français / Méthodologie">📖 Français / Méthodologie</option>
-                    <option value="Autre">📁 Autre</option>
-                </select>
-            </div>
-            <button class="btn-add" id="addLinkBtn"><i class="fas fa-plus-circle"></i> Ajouter</button>
-        </div>
-    </div>
-
-    <div id="subjectsContainer"></div>
-    <footer><i class="fas fa-database"></i> Tous vos liens, notes, favoris et masquages sont sauvegardés automatiquement.</footer>
+    <div id="subjectsContainer"></div>    
+    <footer><i class="fas fa-database"></i> Tous vos liens sont synchronisés avec GitHub (univcours) et sauvegardés automatiquement.</footer>
 </div>
 
-<!-- MODAL EDIT -->
-<div id="editModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); backdrop-filter:blur(3px); align-items:center; justify-content:center; z-index:1000;">
-    <div style="background:white; max-width:500px; width:90%; border-radius:36px; padding:1.8rem;">
-        <h3><i class="fas fa-edit"></i> Modifier le lien</h3>
-        <input type="text" id="editTitle" placeholder="Titre" style="width:100%; padding:0.8rem; border-radius:24px; border:1.5px solid #dce5ec; margin:10px 0;">
-        <input type="url" id="editUrl" placeholder="URL" style="width:100%; padding:0.8rem; border-radius:24px; border:1.5px solid #dce5ec; margin:10px 0;">
-        <select id="editSubject" style="width:100%; padding:0.8rem; border-radius:24px; border:1.5px solid #dce5ec; margin:10px 0;"></select>
-        <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:1rem;">
-            <button id="closeModalBtn" style="padding:0.5rem 1.2rem; border-radius:30px; border:none; background:#eef2f5;">Annuler</button>
-            <button id="saveEditBtn" style="padding:0.5rem 1.2rem; border-radius:30px; border:none; background:#1e6f5c; color:white;">Enregistrer</button>
-        </div>
+<div id="editModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); backdrop-filter:blur(3px); align-items:center; justify-content:center; z-index:1000;">    
+    <div style="background:white; max-width:500px; width:90%; border-radius:36px; padding:1.8rem;">        
+        <h3><i class="fas fa-edit"></i> Modifier le lien</h3>        
+        <input type="text" id="editTitle" placeholder="Titre" style="width:100%; padding:0.8rem; border-radius:24px; border:1.5px solid #dce5ec; margin:10px 0;">        
+        <input type="url" id="editUrl" placeholder="URL" style="width:100%; padding:0.8rem; border-radius:24px; border:1.5px solid #dce5ec; margin:10px 0;">        
+        <select id="editSubject" style="width:100%; padding:0.8rem; border-radius:24px; border:1.5px solid #dce5ec; margin:10px 0;"></select>        
+        <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:1rem;">            
+            <button id="closeModalBtn" style="padding:0.5rem 1.2rem; border-radius:30px; border:none; background:#eef2f5;">Annuler</button>            
+            <button id="saveEditBtn" style="padding:0.5rem 1.2rem; border-radius:30px; border:none; background:#1e6f5c; color:white;">Enregistrer</button>        
+        </div>    
     </div>
 </div>
 
-<script>
-    let linksArray = [];
-    let currentFilter = "all";
-    let isUnlocked = false;  // les modifications nécessitent le code 
-    const STORAGE_KEY = "eco_dashboard_protected_v1";
-    const SECRET_CODE = "1980";
+<script>    
+    let linksArray = [];    
+    let currentFilter = "all";    
+    let isUnlocked = false;    
+    const STORAGE_KEY = "univcours_dashboard_v6"; // مسحت النسخ القديمة باش نبداو على نظافة
+    const SECRET_CODE = "2026"; 
+    const GITHUB_USERNAME = "univcours"; 
 
-    // Les deux nouveaux liens demandés
-    const extraLinksToAdd = [
-        { title: "Résumé Sociologie (dernière version)", url: "https://eco2026.github.io/resume-socio-last/", forcedSubject: "Sociologie Économique" },
-        { title: "Sociologie économique - dernière version complète", url: "https://eco2026.github.io/sociologie-eco-last-version/", forcedSubject: "Sociologie Économique" }
-    ];
-
-    function generateId() { return Date.now() + "-" + Math.random().toString(36).substr(2, 10); }
+    function generateId() { return Date.now() + "-" + Math.random().toString(36).substr(2, 10); }    
     function getToday() { return new Date().toISOString().split('T')[0]; }
 
-    function detectSubject(title, url) {
-        const t = title.toLowerCase();
-        const u = url.toLowerCase();
-        if (u.includes("sociologie-classe") || t.includes("sociologie · cours complet") || (t.includes("sociologie") && t.includes("classe"))) 
-            return "Sociologie Économique";
-        if (u.includes("probleme-eco-et-sociaux") || u.includes("probecosoc") || t.includes("problème économique") || t.includes("capitalisme") || t.includes("croissance"))
-            return "Problèmes économiques et sociaux";
-        if (t.includes("finance") || t.includes("publique")) return "Finances Publiques";
-        if (t.includes("monétaire") || t.includes("monetaire")) return "Économie Monétaire";
-        if (t.includes("compta") || t.includes("analytique")) return "Comptabilité Analytique";
-        if (t.includes("sociologie") || t.includes("socio")) return "Sociologie Économique";
-        if (t.includes("échantillonnage") || t.includes("estimations")) return "Statistiques & Échantillonnage";
-        if (t.includes("français") || t.includes("francais")) return "Français / Méthodologie";
-        return "Autre";
-    }
-
-    const initialRaw = [
-        { title: "Finances Publiques - 250 QCM (effets visuels)", url: "https://eco2026.github.io/Finances-Publiques-250-QCM-Effets-visuels/" },
-        { title: "L'échantillonnage et estimations", url: "https://eco2026.github.io/L-chantillonnage-et-estimations/" },
-        { title: "Sociologie Économique", url: "https://eco2026.github.io/-Sociologie-conomique/" },
-        { title: "Économie monétaire - Préparation examen", url: "https://eco2026.github.io/-conomie-mon-taire-Pr-paration-examen/" },
-        { title: "Économie monétaire et financière", url: "https://eco2026.github.io/economiemon-taireetfinanci-re/" },
-        { title: "Réponses sociologie", url: "https://eco2026.github.io/Reponses-sociologie/" },
-        { title: "Français S4 - Résumé", url: "https://eco2026.github.io/francais-s4-resum-/" },
-        { title: "Réponses sociologie (version complémentaire)", url: "https://eco2026.github.io/reponses-soclgie/" },
-        { title: "Définition comptabilité analytique", url: "https://eco2026.github.io/definition-compta-analytique/" },
-        { title: "Sociologie - Question de classe", url: "https://eco2026.github.io/socioquestionclasse/" },
-        { title: "Examen comptabilité analytique", url: "https://eco2026.github.io/examencompta-analytique/" },
-        { title: "Résumé comptabilité analytique", url: "https://eco2026.github.io/resume-compta-analytique/" },
-        { title: "Cours d'économie monétaire et financière I", url: "https://eco2026.github.io/Cours-d-conomie-mon-taire-et-financi-re-I/" },
-        { title: "ProbEcoSoc (PES)", url: "https://eco2026.github.io/ProbEcoSoc-PES/" },
-        { title: "Comptabilité Analytique - Résumé complet", url: "https://eco2026.github.io/-Comptabilit-Analytique-Resum-/" },
-        { title: "Quiz Finances Publiques", url: "https://eco2026.github.io/Quiz-Finances-Publiques/" },
-        { title: "Finances Publiques - notion clés", url: "https://eco2026.github.io/-Finances-Publiques/" },
-        { title: "Économie monétaire v2", url: "https://eco2026.github.io/eco-mon-taire-v2/" },
-        { title: "TD PROF MAJIDI - Économie Monétaire", url: "https://eco2026.github.io/TD-PROF-MAJIDI-ECO-MONETAIRE/" },
-        { title: "L'échantillonnage et estimations (rappel)", url: "https://eco2026.github.io/L-chantillonnage-et-estimations/" },
-        { title: "Problèmes économiques et sociaux - Capitalisme, Croissance, Pauvreté, Chômage", url: "https://eco2026.github.io/probleme-eco-et-sociaux-classe/" },
-        { title: "Sociologie · Cours complet - Épistémologie, Marx, Weber, Durkheim, sociologie économique", url: "https://eco2026.github.io/sociologie-classe/" },
-        { title: "Résumé Sociologie (dernière version)", url: "https://eco2026.github.io/resume-socio-last/" },
-        { title: "Sociologie économique - dernière version complète", url: "https://eco2026.github.io/sociologie-eco-last-version/" }
-    ];
-
-    function buildInitialLinks() {
-        const map = new Map();
-        for (const item of initialRaw) {
-            if (!map.has(item.url)) {
-                let subject = detectSubject(item.title, item.url);
-                if (item.url.includes("resume-socio-last") || item.url.includes("sociologie-eco-last-version")) subject = "Sociologie Économique";
-                map.set(item.url, {
-                    id: generateId(),
-                    title: item.title,
-                    url: item.url,
-                    subject: subject,
-                    createdAt: getToday(),
-                    isFavorite: false,
-                    isHidden: false,
-                    note: ""
-                });
-            }
+    function detectSubject(title, url) {        
+        const t = title.toLowerCase();        
+        const u = url.toLowerCase();        
+        const text = t + " " + u; 
+        
+        if (text.match(/probl[èe]me/i) || text.match(/pes/i) || text.match(/probecosoc/i) || text.match(/sociaux/i) || text.match(/capitalisme/i) || text.match(/croissance/i) || text.match(/ch[ôo]mage/i) || text.match(/pauvret[é|e]/i) || text.match(/d[é|e]veloppement/i)) {
+            return "Problèmes Eco et Sociaux";
         }
-        return Array.from(map.values());
+
+        if (text.match(/sociologie/i) || text.match(/socio/i) || text.match(/weber/i) || text.match(/marx/i) || text.match(/durkheim/i) || text.match(/epistemologie/i) || text.match(/épistémologie/i) || text.match(/classe/i)) {
+            return "Sociologie";
+        }
+
+        if (text.match(/publiques?/i) || text.match(/\bfp\b/i) || (text.match(/finance/i) && text.match(/publique/i)) || text.match(/budget/i) || text.match(/imp[ôo]t/i) || text.match(/fiscalit[ée]/i) || text.match(/loi de finance/i)) {
+            return "Finances Publiques";
+        }
+
+        if (text.match(/mon[ée]taire/i) || text.match(/monetaire/i) || text.match(/monnaie/i) || text.match(/financi[èe]re/i) || text.match(/banque/i) || text.match(/bancaire/i) || text.match(/taux/i)) {
+            return "Economie Monétaire et Financière";
+        }
+
+        if (text.match(/compta/i) || text.match(/analytique/i) || text.match(/c[oûou]ts/i) || text.match(/charges/i) || text.match(/inventaire/i)) {
+            return "Comptabilité Analytique";
+        }
+
+        if (text.match(/[ée]chantillonnage/i) || text.match(/estimation/i) || text.match(/statistique/i) || text.match(/stats/i) || text.match(/probabilit[ée]/i) || text.match(/intervalle/i) || text.match(/variance/i)) {
+            return "Echantillonnage et Estimation";
+        }
+
+        if (text.match(/fran[çc]ais/i) || text.match(/m[ée]thodologie/i) || text.match(/langue/i) || text.match(/communication/i) || text.match(/\bs4\b/i) || (text.match(/r[ée]sum[ée]/i) && !text.match(/socio/i) && !text.match(/compta/i))) {
+            return "Français";
+        }
+
+        // إذا ما لقى حتى موديل من هادو، كيرجع null باش ما يضيفوش للصفحة
+        return null;    
     }
 
-    function loadFromLocalStorage() {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-            try {
-                const parsed = JSON.parse(stored);
-                if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].id) {
-                    linksArray = parsed;
-                    const existingUrls = new Set(linksArray.map(l => l.url));
-                    for (const extra of extraLinksToAdd) {
-                        if (!existingUrls.has(extra.url)) {
-                            linksArray.push({
-                                id: generateId(),
-                                title: extra.title,
-                                url: extra.url,
-                                subject: extra.forcedSubject,
-                                createdAt: getToday(),
-                                isFavorite: false,
-                                isHidden: false,
-                                note: ""
-                            });
-                        }
+    async function syncWithGitHub() {
+        const syncStatus = document.getElementById("syncStatus");
+        try {
+            const response = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100&sort=updated`);
+            if (!response.ok) throw new Error("Erreur API");
+            const repos = await response.json();
+
+            let addedCount = 0;
+            const existingUrls = new Set(linksArray.map(l => l.url.toLowerCase()));
+
+            repos.forEach(repo => {
+                let repoUrl = `https://${GITHUB_USERNAME}.github.io/${repo.name}/`.toLowerCase();
+
+                if (!existingUrls.has(repoUrl)) {
+                    let cleanTitle = repo.description ? repo.description : repo.name.replace(/-/g, ' ').trim();
+                    if (!cleanTitle) cleanTitle = repo.name;
+
+                    let subject = detectSubject(cleanTitle, repoUrl);
+
+                    // غير يلا كان تابع لشي موديل من الموديلات 7 عاد كنزيدوه
+                    if (subject) {
+                        linksArray.push({
+                            id: generateId(),
+                            title: cleanTitle,
+                            url: repoUrl,
+                            subject: subject,
+                            createdAt: getToday(),
+                            isFavorite: false,
+                            isHidden: false,
+                            note: ""
+                        });
+                        addedCount++;
                     }
-                    saveToLocalStorage();
-                    return;
                 }
-            } catch(e) {}
-        }
-        linksArray = buildInitialLinks();
-        saveToLocalStorage();
-    }
+            });
 
-    function saveToLocalStorage() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(linksArray));
-        updateStatsUI();
-    }
-
-    function updateStatsUI() {
-        document.getElementById("totalResourcesCount").innerText = linksArray.length;
-        document.getElementById("favCount").innerText = linksArray.filter(l => l.isFavorite).length;
-        document.getElementById("hiddenCount").innerText = linksArray.filter(l => l.isHidden).length;
-    }
-
-    // Vérification du code avant toute modification
-    function requireUnlock(actionName, callback) {
-        if (isUnlocked) {
-            callback();
-        } else {
-            alert(`⚠️ Vous devez entrer le code ${SECRET_CODE} pour ${actionName} !\nDéverrouillez la session en haut de la page.`);
-        }
-    }
-
-    function addCustomLink(title, url, subject, isHidden = false) {
-        if (!title || !url) { alert("Titre et URL requis"); return false; }
-        if (!url.startsWith("http")) url = "https://" + url;
-        if (linksArray.some(link => link.url === url)) { alert("Cette URL existe déjà"); return false; }
-        const newLink = {
-            id: generateId(),
-            title: title.trim(),
-            url: url,
-            subject: subject,
-            createdAt: getToday(),
-            isFavorite: false,
-            isHidden: isHidden,
-            note: ""
-        };
-        linksArray.push(newLink);
-        saveToLocalStorage();
-        renderDashboard();
-        return true;
-    }
-
-    function addNewLink() {
-        requireUnlock("ajouter un lien", () => {
-            let title = document.getElementById("newLinkTitle").value.trim();
-            let url = document.getElementById("newLinkUrl").value.trim();
-            const subject = document.getElementById("newLinkSubject").value;
-            if (!title) { alert("Veuillez saisir un titre"); return; }
-            if (!url) { alert("Veuillez saisir une URL"); return; }
-            addCustomLink(title, url, subject, false);
-            document.getElementById("newLinkTitle").value = "";
-            document.getElementById("newLinkUrl").value = "";
-        });
-    }
-
-    function toggleFavorite(id) {
-        requireUnlock("modifier les favoris", () => {
-            const link = linksArray.find(l => l.id === id);
-            if (link) { link.isFavorite = !link.isFavorite; saveToLocalStorage(); renderDashboard(); }
-        });
-    }
-    
-    function toggleHidden(id) {
-        requireUnlock("masquer/afficher un lien", () => {
-            const link = linksArray.find(l => l.id === id);
-            if (link) { link.isHidden = !link.isHidden; saveToLocalStorage(); renderDashboard(); }
-        });
-    }
-    
-    function updateNote(id, newNote) {
-        requireUnlock("modifier une note", () => {
-            const link = linksArray.find(l => l.id === id);
-            if (link) { link.note = newNote; saveToLocalStorage(); renderDashboard(); }
-        });
-    }
-    
-    function deleteLink(id) {
-        requireUnlock("supprimer un lien", () => {
-            if (confirm("Supprimer définitivement cette ressource ?")) {
-                linksArray = linksArray.filter(l => l.id !== id);
+            if (addedCount > 0) {
                 saveToLocalStorage();
                 renderDashboard();
             }
-        });
-    }
+            
+            syncStatus.innerHTML = `<i class="fas fa-check-circle"></i> GitHub à jour`;
+            syncStatus.style.color = "#27ae60";
+            syncStatus.style.borderColor = "#2ecc71";
+            setTimeout(() => { syncStatus.style.display = 'none'; }, 3000);
 
-    let currentEditId = null;
-    function openEditModal(id) {
-        requireUnlock("modifier un lien", () => {
-            const link = linksArray.find(l => l.id === id);
-            if (!link) return;
-            currentEditId = id;
-            document.getElementById("editTitle").value = link.title;
-            document.getElementById("editUrl").value = link.url;
-            const select = document.getElementById("editSubject");
-            select.innerHTML = `<option value="Sociologie Économique">👥 Sociologie Économique</option>
-                <option value="Problèmes économiques et sociaux">📉 Problèmes économiques et sociaux</option>
-                <option value="Finances Publiques">💰 Finances Publiques</option>
-                <option value="Économie Monétaire">🏦 Économie Monétaire</option>
-                <option value="Comptabilité Analytique">📊 Comptabilité Analytique</option>
-                <option value="Statistiques & Échantillonnage">📈 Statistiques & Échantillonnage</option>
-                <option value="Français / Méthodologie">📖 Français / Méthodologie</option>
-                <option value="Autre">📁 Autre</option>`;
-            select.value = link.subject;
-            document.getElementById("editModal").style.display = "flex";
-        });
-    }
-    
-    function closeEditModal() { document.getElementById("editModal").style.display = "none"; currentEditId = null; }
-    
-    function saveEdit() {
-        if (!currentEditId) return;
-        const newTitle = document.getElementById("editTitle").value.trim();
-        let newUrl = document.getElementById("editUrl").value.trim();
-        const newSubject = document.getElementById("editSubject").value;
-        if (!newTitle) { alert("Titre requis"); return; }
-        if (!newUrl) { alert("URL requise"); return; }
-        if (!newUrl.startsWith("http")) newUrl = "https://" + newUrl;
-        const index = linksArray.findIndex(l => l.id === currentEditId);
-        if (index !== -1) {
-            if (linksArray.some((l, idx) => idx !== index && l.url === newUrl)) {
-                alert("URL déjà utilisée");
-                return;
-            }
-            linksArray[index] = { ...linksArray[index], title: newTitle, url: newUrl, subject: newSubject };
-            saveToLocalStorage();
-            renderDashboard();
-        }
-        closeEditModal();
-    }
-
-    function createNoteEditor(linkId, currentNote) {
-        const container = document.createElement("div");
-        container.className = "note-area";
-        const iconSpan = document.createElement("span");
-        iconSpan.className = "note-icon";
-        iconSpan.innerHTML = '<i class="fas fa-pencil-alt"></i>';
-        const noteDiv = document.createElement("div");
-        noteDiv.className = "note-text" + (currentNote ? "" : " empty");
-        noteDiv.innerText = currentNote && currentNote.trim() !== "" ? currentNote : "Ajouter une observation...";
-        let editing = false;
-        noteDiv.addEventListener("click", (e) => {
-            e.stopPropagation();
-            if (editing) return;
-            if (!isUnlocked) {
-                alert(`⚠️ Vous devez entrer le code ${SECRET_CODE} pour modifier une note !`);
-                return;
-            }
-            editing = true;
-            const input = document.createElement("textarea");
-            input.className = "note-input";
-            input.value = currentNote || "";
-            input.rows = 2;
-            const saveBtn = document.createElement("button");
-            saveBtn.className = "note-save-btn";
-            saveBtn.innerText = "Enregistrer";
-            container.replaceChild(input, noteDiv);
-            container.appendChild(saveBtn);
-            const finish = () => {
-                const newVal = input.value.trim();
-                updateNote(linkId, newVal);
-                editing = false;
-            };
-            saveBtn.addEventListener("click", (e2) => { e2.stopPropagation(); finish(); });
-            input.addEventListener("keydown", (e2) => { if(e2.key === "Enter" && !e2.shiftKey) { e2.preventDefault(); finish(); } });
-        });
-        container.appendChild(iconSpan);
-        container.appendChild(noteDiv);
-        return container;
-    }
-
-    function renderDashboard() {
-        const container = document.getElementById("subjectsContainer");
-        if (!container) return;
-        container.innerHTML = "";
-        
-        let filtered = [...linksArray];
-        if (currentFilter === "favorites") filtered = filtered.filter(l => l.isFavorite);
-        else if (currentFilter === "visible") filtered = filtered.filter(l => !l.isHidden);
-        else if (currentFilter === "hidden") filtered = filtered.filter(l => l.isHidden);
-        
-        updateStatsUI();
-        if (filtered.length === 0) {
-            container.innerHTML = `<div class="empty-state"><i class="fas fa-filter"></i><p>Aucune ressource avec ce filtre.</p></div>`;
-            return;
-        }
-        
-        const grouped = new Map();
-        for (const link of filtered) {
-            if (!grouped.has(link.subject)) grouped.set(link.subject, []);
-            grouped.get(link.subject).push(link);
-        }
-        
-        const order = ["Sociologie Économique", "Problèmes économiques et sociaux", "Finances Publiques", "Économie Monétaire", "Comptabilité Analytique", "Statistiques & Échantillonnage", "Français / Méthodologie", "Autre"];
-        const sorted = Array.from(grouped.keys()).sort((a,b) => {
-            let ia = order.indexOf(a); if(ia===-1) ia=999;
-            let ib = order.indexOf(b); if(ib===-1) ib=999;
-            return ia-ib;
-        });
-        
-        for (const subject of sorted) {
-            const items = grouped.get(subject);
-            const section = document.createElement("div");
-            section.className = "subject-section";
-            let borderColor = "#2c9e7c";
-            if(subject === "Sociologie Économique") borderColor="#c44569";
-            else if(subject === "Problèmes économiques et sociaux") borderColor="#e67e22";
-            else if(subject === "Finances Publiques") borderColor="#d4af37";
-            else if(subject === "Économie Monétaire") borderColor="#2c7da0";
-            else if(subject === "Comptabilité Analytique") borderColor="#5e9b8c";
-            else if(subject === "Statistiques & Échantillonnage") borderColor="#3498db";
-            else if(subject === "Français / Méthodologie") borderColor="#9b59b6";
-            section.innerHTML = `<div class="subject-header" style="border-left-color: ${borderColor};"><h2>${getSubjectIcon(subject)} ${subject}</h2><span class="subject-count">${items.length} ressource${items.length>1?'s':''}</span></div><div class="links-grid" id="grid-${subject.replace(/\s/g,'')}"></div>`;
-            container.appendChild(section);
-            const grid = section.querySelector(".links-grid");
-            items.forEach(link => { grid.appendChild(createCard(link)); });
+        } catch (error) {
+            console.error("Erreur avec GitHub:", error);
+            syncStatus.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Erreur Sync`;
+            syncStatus.style.color = "#e74c3c";
         }
     }
-    
-    function getSubjectIcon(subject) {
-        const icons = { "Sociologie Économique":"👥","Problèmes économiques et sociaux":"📉","Finances Publiques":"💰","Économie Monétaire":"🏦","Comptabilité Analytique":"📊","Statistiques & Échantillonnage":"📈","Français / Méthodologie":"📖","Autre":"📁" };
-        return icons[subject] || "📘";
-    }
-    
-    function getIconClass(title) {
-        const t = title.toLowerCase();
-        if(t.includes("qcm")||t.includes("quiz")) return "fa-question-circle";
-        if(t.includes("compta")) return "fa-calculator";
-        if(t.includes("finance")) return "fa-landmark";
-        if(t.includes("monétaire")) return "fa-coins";
-        if(t.includes("sociologie")) return "fa-users";
-        return "fa-book-open";
-    }
-    
-    function truncateUrl(url, max=60) { return url.length > max ? url.substring(0,max)+"..." : url; }
-    function escapeHtml(str) { if(!str) return ""; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
-    
-    function createCard(link) {
-        const card = document.createElement("div");
-        card.className = `resource-card ${link.isFavorite ? 'favorite' : ''} ${link.isHidden ? 'hidden' : ''}`;
-        const mainDiv = document.createElement("div"); mainDiv.className = "card-main";
-        const infoDiv = document.createElement("div"); infoDiv.className = "card-info";
-        infoDiv.addEventListener("click", () => { if(!link.isHidden) window.open(link.url, "_blank"); });
-        infoDiv.innerHTML = `<div class="card-icon"><i class="fas ${getIconClass(link.title)}"></i></div><div class="card-text"><div class="card-title">${escapeHtml(link.title)}</div><div class="card-meta"><span><i class="fas fa-calendar-alt"></i> ${link.createdAt}</span><span><i class="fas fa-folder"></i> ${link.subject}</span></div><div class="card-url" title="${escapeHtml(link.url)}">${truncateUrl(link.url)}</div></div>`;
-        const actionsDiv = document.createElement("div"); actionsDiv.className = "card-actions";
-        
-        const favBtn = document.createElement("button"); favBtn.className = `action-btn fav-btn ${link.isFavorite ? 'active-fav' : ''}`; favBtn.innerHTML = '<i class="fas fa-star"></i>';
-        favBtn.addEventListener("click", (e) => { e.stopPropagation(); toggleFavorite(link.id); });
-        
-        const hideBtn = document.createElement("button"); hideBtn.className = `action-btn hide-btn ${link.isHidden ? 'active-hide' : ''}`; hideBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';
-        hideBtn.addEventListener("click", (e) => { e.stopPropagation(); toggleHidden(link.id); });
-        
-        const editBtn = document.createElement("button"); editBtn.className = "action-btn edit-btn"; editBtn.innerHTML = '<i class="fas fa-pencil-alt"></i>';
-        editBtn.addEventListener("click", (e) => { e.stopPropagation(); openEditModal(link.id); });
-        
-        const delBtn = document.createElement("button"); delBtn.className = "action-btn delete-btn"; delBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
-        delBtn.addEventListener("click", (e) => { e.stopPropagation(); deleteLink(link.id); });
-        
-        actionsDiv.append(favBtn, hideBtn, editBtn, delBtn);
-        mainDiv.append(infoDiv, actionsDiv);
-        card.appendChild(mainDiv);
-        card.appendChild(createNoteEditor(link.id, link.note));
-        return card;
+
+    function loadFromLocalStorage() {        
+        const stored = localStorage.getItem(STORAGE_KEY);        
+        if (stored) {            
+            try {                
+                const parsed = JSON.parse(stored);                
+                if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].id) {                    
+                    linksArray = parsed;
+                    return;                
+                }            
+            } catch(e) {}        
+        }        
+        linksArray = [];        
     }
 
-    // Gestion du déverrouillage avec le code 
-    function unlockSession() {
-        const codeInput = document.getElementById("adminCodeInput");
-        if (codeInput.value === SECRET_CODE) {
-            isUnlocked = true;
-            document.getElementById("lockIcon").className = "fas fa-lock-open";
-            document.getElementById("statusText").innerHTML = "✅ Mode édition activé (code 1980)";
-            document.getElementById("unlockBtn").style.display = "none";
-            document.getElementById("lockBtn").style.display = "inline-block";
-            document.getElementById("addLinkBtn").disabled = false;
-            alert("✅ Code correct ! Vous pouvez maintenant ajouter, modifier, supprimer, mettre en favori, masquer et ajouter des notes.");
-        } else {
-            alert("❌ Code incorrect ");
-            codeInput.value = "";
-        }
-    }
-    
-    function lockSession() {
-        isUnlocked = false;
-        document.getElementById("lockIcon").className = "fas fa-lock";
-        document.getElementById("statusText").innerHTML = "🔒 Mode lecture seule";
-        document.getElementById("unlockBtn").style.display = "inline-block";
-        document.getElementById("lockBtn").style.display = "none";
-        document.getElementById("addLinkBtn").disabled = true;
-        document.getElementById("adminCodeInput").value = "";
+    function saveToLocalStorage() {        
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(linksArray));        
+        updateStatsUI();    
     }
 
-    function init() {
-        loadFromLocalStorage();
-        renderDashboard();
-        
-        // Désactiver le bouton d'ajout par défaut (lecture seule)
-        document.getElementById("addLinkBtn").disabled = true;
-        
-        document.getElementById("addLinkBtn").addEventListener("click", addNewLink);
-        document.getElementById("unlockBtn").addEventListener("click", unlockSession);
-        document.getElementById("lockBtn").addEventListener("click", lockSession);
-        
-        document.querySelectorAll(".filter-btn").forEach(btn => {
-            btn.addEventListener("click", (e) => {
-                document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
-                btn.classList.add("active");
-                currentFilter = btn.getAttribute("data-filter");
-                renderDashboard();
-            });
-        });
-        
-        document.getElementById("closeModalBtn").addEventListener("click", closeEditModal);
-        document.getElementById("saveEditBtn").addEventListener("click", saveEdit);
-        window.addEventListener("click", (e) => { if(e.target === document.getElementById("editModal")) closeEditModal(); });
-        window.addEventListener("keydown", (e) => { if(e.key==="Escape" && document.getElementById("editModal").style.display==="flex") closeEditModal(); });
+    function updateStatsUI() {        
+        document.getElementById("totalResourcesCount").innerText = linksArray.length;        
+        document.getElementById("favCount").innerText = linksArray.filter(l => l.isFavorite).length;        
+        document.getElementById("hiddenCount").innerText = linksArray.filter(l => l.isHidden).length;    
     }
-    
+
+    function requireUnlock(actionName, callback) {        
+        if (isUnlocked) {            
+            callback();        
+        } else {            
+            alert(`⚠️ Vous devez entrer le code ${SECRET_CODE} pour ${actionName} !\nDéverrouillez la session en haut de la page.`);        
+        }    
+    }
+
+    function addCustomLink(title, url, subject, isHidden = false) {        
+        if (!title || !url) { alert("Titre et URL requis"); return false; }        
+        if (!url.startsWith("http")) url = "https://" + url;        
+        if (linksArray.some(link => link.url.toLowerCase() === url.toLowerCase())) { alert("Cette URL existe déjà"); return false; }        
+        const newLink = {            
+            id: generateId(),            
+            title: title.trim(),            
+            url: url,            
+            subject: subject,            
+            createdAt: getToday(),            
+            isFavorite: false,            
+            isHidden: isHidden,            
+            note: ""        
+        };        
+        linksArray.push(newLink);        
+        saveToLocalStorage();        
+        renderDashboard();        
+        return true;    
+    }
+
+    function addNewLink() {        
+        requireUnlock("ajouter un lien", () => {            
+            let title = document.getElementById("newLinkTitle").value.trim();            
+            let url = document.getElementById("newLinkUrl").value.trim();            
+            const subject = document.getElementById("newLinkSubject").value;            
+            if (!title) { alert("Veuillez saisir un titre"); return; }            
+            if (!url) { alert("Veuillez saisir une URL"); return; }            
+            addCustomLink(title, url, subject, false);            
+            document.getElementById("newLinkTitle").value = "";            
+            document.getElementById("newLinkUrl").value = "";        
+        });    
+    }
+
+    function toggleFavorite(id) {        
+        requireUnlock("modifier les favoris", () => {            
+            const link = linksArray.find(l => l.id === id);            
+            if (link) { link.isFavorite = !link.isFavorite; saveToLocalStorage(); renderDashboard(); }        
+        });    
+    }        
+
+    function toggleHidden(id) {        
+        requireUnlock("masquer/afficher un lien", () => {            
+            const link = linksArray.find(l => l.id === id);            
+            if (link) { link.isHidden = !link.isHidden; saveToLocalStorage(); renderDashboard(); }        
+        });    
+    }        
+
+    function updateNote(id, newNote) {        
+        requireUnlock("modifier une note", () => {            
+            const link = linksArray.find(l => l.id === id);            
+            if (link) { link.note = newNote; saveToLocalStorage(); renderDashboard(); }        
+        });    
+    }        
+
+    function deleteLink(id) {        
+        requireUnlock("supprimer un lien", () => {            
+            if (confirm("Supprimer définitivement cette ressource ? (Elle risque de revenir si elle est toujours sur GitHub)")) {                
+                linksArray = linksArray.filter(l => l.id !== id);                
+                saveToLocalStorage();                
+                renderDashboard();            
+            }        
+        });    
+    }
+
+    let currentEditId = null;    
+    function openEditModal(id) {        
+        requireUnlock("modifier un lien", () => {            
+            const link = linksArray.find(l => l.id === id);            
+            if (!link) return;            
+            currentEditId = id;            
+            document.getElementById("editTitle").value = link.title;            
+            document.getElementById("editUrl").value = link.url;            
+            const select = document.getElementById("editSubject");            
+            select.innerHTML = `<option value="Echantillonnage et Estimation">📈 Echantillonnage et Estimation</option>                
+                <option value="Economie Monétaire et Financière">🏦 Economie Monétaire et Financière</option>                
+                <option value="Français">📖 Français</option>                
+                <option value="Problèmes Eco et Sociaux">📉 Problèmes Eco et Sociaux</option>                
+                <option value="Sociologie">👥 Sociologie</option>                
+                <option value="Comptabilité Analytique">📊 Comptabilité Analytique</option>                
+                <option value="Finances Publiques">💰 Finances Publiques</option>`;            
+            select.value = link.subject;            
+            document.getElementById("editModal").style.display = "flex";        
+        });    
+    }        
+
+    function closeEditModal() { document.getElementById("editModal").style.display = "none"; currentEditId = null; }        
+
+    function saveEdit() {        
+        if (!currentEditId) return;        
+        const newTitle = document.getElementById("editTitle").value.trim();        
+        let newUrl = document.getElementById("editUrl").value.trim();        
+        const newSubject = document.getElementById("editSubject").value;        
+        if (!newTitle) { alert("Titre requis"); return; }        
+        if (!newUrl) { alert("URL requise"); return; }        
+        if (!newUrl.startsWith("http")) newUrl = "https://" + newUrl;        
+        const index = linksArray.findIndex(l => l.id === currentEditId);        
+        if (index !== -1) {            
+            if (linksArray.some((l, idx) => idx !== index && l.url.toLowerCase() === newUrl.toLowerCase())) {                
+                alert("URL déjà utilisée");                
+                return;            
+            }            
+            linksArray[index] = { ...linksArray[index], title: newTitle, url: newUrl, subject: newSubject };            
+            saveToLocalStorage();            
+            renderDashboard();        
+        }        
+        closeEditModal();    
+    }
+
+    function createNoteEditor(linkId, currentNote) {        
+        const container = document.createElement("div");        
+        container.className = "note-area";        
+        const iconSpan = document.createElement("span");        
+        iconSpan.className = "note-icon";        
+        iconSpan.innerHTML = '<i class="fas fa-pencil-alt"></i>';        
+        const noteDiv = document.createElement("div");        
+        noteDiv.className = "note-text" + (currentNote ? "" : " empty");        
+        noteDiv.innerText = currentNote && currentNote.trim() !== "" ? currentNote : "Ajouter une observation...";        
+        let editing = false;        
+        noteDiv.addEventListener("click", (e) => {            
+            e.stopPropagation();            
+            if (editing) return;            
+            if (!isUnlocked) {                
+                alert(`⚠️ Vous devez entrer le code ${SECRET_CODE} pour modifier une note !`);                
+                return;            
+            }            
+            editing = true;            
+            const input = document.createElement("textarea");            
+            input.className = "note-input";            
+            input.value = currentNote || "";            
+            input.rows = 2;            
+            const saveBtn = document.createElement("button");            
+            saveBtn.className = "note-save-btn";            
+            saveBtn.innerText = "Enregistrer";            
+            container.replaceChild(input, noteDiv);            
+            container.appendChild(saveBtn);            
+            const finish = () => {                
+                const newVal = input.value.trim();                
+                updateNote(linkId, newVal);                
+                editing = false;            
+            };            
+            saveBtn.addEventListener("click", (e2) => { e2.stopPropagation(); finish(); });            
+            input.addEventListener("keydown", (e2) => { if(e2.key === "Enter" && !e2.shiftKey) { e2.preventDefault(); finish(); } });        
+        });        
+        container.appendChild(iconSpan);        
+        container.appendChild(noteDiv);        
+        return container;    
+    }
+
+    function renderDashboard() {        
+        const container = document.getElementById("subjectsContainer");        
+        if (!container) return;        
+        container.innerHTML = "";                
+        
+        // كنفيلتريو الروابط باش ما يبانش لينا شي حاجة ما تابعاش للموديلات
+        let filtered = linksArray.filter(l => l.subject && l.subject !== "Autre");        
+        
+        if (currentFilter === "favorites") filtered = filtered.filter(l => l.isFavorite);        
+        else if (currentFilter === "visible") filtered = filtered.filter(l => !l.isHidden);        
+        else if (currentFilter === "hidden") filtered = filtered.filter(l => l.isHidden);                
+        
+        updateStatsUI();        
+        if (filtered.length === 0) {            
+            container.innerHTML = `<div class="empty-state"><i class="fas fa-filter"></i><p>Aucune ressource avec ce filtre.</p></div>`;            
+            return;        
+        }                
+        
+        const grouped = new Map();        
+        for (const link of filtered) {            
+            if (!grouped.has(link.subject)) grouped.set(link.subject, []);            
+            grouped.get(link.subject).push(link);        
+        }                
+        
+        const order = ["Echantillonnage et Estimation", "Economie Monétaire et Financière", "Français", "Problèmes Eco et Sociaux", "Sociologie", "Comptabilité Analytique", "Finances Publiques"];        
+        
+        const sorted = Array.from(grouped.keys()).sort((a,b) => {            
+            let ia = order.indexOf(a); if(ia===-1) ia=999;            
+            let ib = order.indexOf(b); if(ib===-1) ib=999;            
+            return ia-ib;        
+        });                
+        
+        for (const subject of sorted) {            
+            const items = grouped.get(subject);            
+            const section = document.createElement("div");            
+            section.className = "subject-section";            
+            
+            let borderColor = "#2c9e7c";            
+            if(subject === "Echantillonnage et Estimation") borderColor="#3498db";            
+            else if(subject === "Economie Monétaire et Financière") borderColor="#2c7da0";            
+            else if(subject === "Français") borderColor="#9b59b6";            
+            else if(subject === "Problèmes Eco et Sociaux") borderColor="#e67e22";            
+            else if(subject === "Sociologie") borderColor="#c44569";            
+            else if(subject === "Comptabilité Analytique") borderColor="#5e9b8c";            
+            else if(subject === "Finances Publiques") borderColor="#d4af37";            
+            
+            section.innerHTML = `<div class="subject-header" style="border-left-color: ${borderColor};"><h2>${getSubjectIcon(subject)} ${subject}</h2><span class="subject-count">${items.length} ressource${items.length>1?'s':''}</span></div><div class="links-grid" id="grid-${subject.replace(/\s/g,'')}"></div>`;            
+            container.appendChild(section);            
+            const grid = section.querySelector(".links-grid");            
+            items.forEach(link => { grid.appendChild(createCard(link)); });        
+        }    
+    }        
+
+    function getSubjectIcon(subject) {        
+        const icons = { "Sociologie":"👥", "Problèmes Eco et Sociaux":"📉", "Finances Publiques":"💰", "Economie Monétaire et Financière":"🏦", "Comptabilité Analytique":"📊", "Echantillonnage et Estimation":"📈", "Français":"📖" };        
+        return icons[subject] || "📘";    
+    }        
+
+    function getIconClass(title) {        
+        const t = title.toLowerCase();        
+        if(t.includes("qcm")||t.includes("quiz")) return "fa-question-circle";        
+        if(t.includes("compta")||t.includes("analytique")) return "fa-calculator";        
+        if(t.includes("finance")||t.includes("publique")) return "fa-landmark";        
+        if(t.includes("monétaire")||t.includes("monetaire")) return "fa-coins";        
+        if(t.includes("sociologie")||t.includes("socio")) return "fa-users";        
+        if(t.includes("échantillonnage")||t.includes("estimation")) return "fa-chart-pie";
+        return "fa-book-open";    
+    }        
+
+    function truncateUrl(url, max=60) { return url.length > max ? url.substring(0,max)+"..." : url; }    
+    function escapeHtml(str) { if(!str) return ""; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }        
+
+    function createCard(link) {        
+        const card = document.createElement("div");        
+        card.className = `resource-card ${link.isFavorite ? 'favorite' : ''} ${link.isHidden ? 'hidden' : ''}`;        
+        const mainDiv = document.createElement("div"); mainDiv.className = "card-main";        
+        const infoDiv = document.createElement("div"); infoDiv.className = "card-info";        
+        infoDiv.addEventListener("click", () => { if(!link.isHidden) window.open(link.url, "_blank"); });        
+        infoDiv.innerHTML = `<div class="card-icon"><i class="fas ${getIconClass(link.title)}"></i></div><div class="card-text"><div class="card-title">${escapeHtml(link.title)}</div><div class="card-meta"><span><i class="fas fa-calendar-alt"></i> ${link.createdAt}</span><span><i class="fas fa-folder"></i> ${link.subject}</span></div><div class="card-url" title="${escapeHtml(link.url)}">${truncateUrl(link.url)}</div></div>`;        
+        const actionsDiv = document.createElement("div"); actionsDiv.className = "card-actions";                
+        const favBtn = document.createElement("button"); favBtn.className = `action-btn fav-btn ${link.isFavorite ? 'active-fav' : ''}`; favBtn.innerHTML = '<i class="fas fa-star"></i>';        
+        favBtn.addEventListener("click", (e) => { e.stopPropagation(); toggleFavorite(link.id); });                
+        const hideBtn = document.createElement("button"); hideBtn.className = `action-btn hide-btn ${link.isHidden ? 'active-hide' : ''}`; hideBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';        
+        hideBtn.addEventListener("click", (e) => { e.stopPropagation(); toggleHidden(link.id); });                
+        const editBtn = document.createElement("button"); editBtn.className = "action-btn edit-btn"; editBtn.innerHTML = '<i class="fas fa-pencil-alt"></i>';        
+        editBtn.addEventListener("click", (e) => { e.stopPropagation(); openEditModal(link.id); });                
+        const delBtn = document.createElement("button"); delBtn.className = "action-btn delete-btn"; delBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';        
+        delBtn.addEventListener("click", (e) => { e.stopPropagation(); deleteLink(link.id); });                
+        actionsDiv.append(favBtn, hideBtn, editBtn, delBtn);        
+        mainDiv.append(infoDiv, actionsDiv);        
+        card.appendChild(mainDiv);        
+        card.appendChild(createNoteEditor(link.id, link.note));        
+        return card;    
+    }
+
+    function unlockSession() {        
+        const codeInput = document.getElementById("adminCodeInput");        
+        if (codeInput.value === SECRET_CODE) {            
+            isUnlocked = true;            
+            document.getElementById("lockIcon").className = "fas fa-lock-open";            
+            document.getElementById("statusText").innerHTML = `✅ Mode édition activé (code ${SECRET_CODE})`;            
+            document.getElementById("unlockBtn").style.display = "none";            
+            document.getElementById("lockBtn").style.display = "inline-block";            
+            document.getElementById("addLinkBtn").disabled = false;            
+            alert("✅ Code correct !");        
+        } else {            
+            alert("❌ Code incorrect ");            
+            codeInput.value = "";        
+        }    
+    }        
+
+    function lockSession() {        
+        isUnlocked = false;        
+        document.getElementById("lockIcon").className = "fas fa-lock";        
+        document.getElementById("statusText").innerHTML = "🔒 Mode lecture seule";        
+        document.getElementById("unlockBtn").style.display = "inline-block";        
+        document.getElementById("lockBtn").style.display = "none";        
+        document.getElementById("addLinkBtn").disabled = true;        
+        document.getElementById("adminCodeInput").value = "";    
+    }
+
+    async function init() {        
+        loadFromLocalStorage();        
+        renderDashboard();                
+        
+        await syncWithGitHub();
+
+        document.getElementById("addLinkBtn").disabled = true;                
+        document.getElementById("addLinkBtn").addEventListener("click", addNewLink);        
+        document.getElementById("unlockBtn").addEventListener("click", unlockSession);        
+        document.getElementById("lockBtn").addEventListener("click", lockSession);                
+        document.querySelectorAll(".filter-btn").forEach(btn => {            
+            btn.addEventListener("click", (e) => {                
+                document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));                
+                btn.classList.add("active");                
+                currentFilter = btn.getAttribute("data-filter");                
+                renderDashboard();            
+            });        
+        });                
+        document.getElementById("closeModalBtn").addEventListener("click", closeEditModal);        
+        document.getElementById("saveEditBtn").addEventListener("click", saveEdit);        
+        window.addEventListener("click", (e) => { if(e.target === document.getElementById("editModal")) closeEditModal(); });        
+        window.addEventListener("keydown", (e) => { if(e.key==="Escape" && document.getElementById("editModal").style.display==="flex") closeEditModal(); });    
+    }        
+
     init();
 </script>
 </body>
